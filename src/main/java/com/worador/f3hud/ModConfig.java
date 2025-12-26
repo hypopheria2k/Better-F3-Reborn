@@ -6,7 +6,7 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-@Config(modid = "f3hud", name = "f3hud", category = "")
+@Mod(modid = "betterf3reborn", name = "Better F3 Reborn", version = "1.0.0")
 public class ModConfig {
     
     @Config.Comment("Module Settings - Enable/Disable different info modules")
