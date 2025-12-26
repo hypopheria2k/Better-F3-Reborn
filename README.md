@@ -6,7 +6,9 @@
 
 A modern, feature-rich debug HUD overhaul for Minecraft 1.12.2 - bringing Better F3's clean design to older versions!
 
-![Better F3 Reborn Screenshot](https://via.placeholder.com/800x450.png?text=Add+Your+Screenshot+Here)
+[Better F3 Reborn Screenshot]
+<img width="1280" height="939" alt="2025-12-27_00 17 43" src="https://github.com/user-attachments/assets/c3151e81-33dc-453d-84d1-b82ef4f4b11c" />
+
 
 ## ✨ Features
 
@@ -61,13 +63,12 @@ Edit `config/f3hud.cfg` to customize:
 ## 🖼️ Screenshots
 
 ### Main HUD
-![Main HUD](https://via.placeholder.com/800x450.png?text=Add+Main+HUD+Screenshot)
+![Main HUD]
+<img width="1280" height="939" alt="2025-12-27_00 18 08" src="https://github.com/user-attachments/assets/c5d21bdc-c734-43d0-87b3-8fc572a8ebd7" />
 
 ### Performance Graph
-![Performance Graph](https://via.placeholder.com/800x450.png?text=Add+Performance+Graph+Screenshot)
-
-### System Info
-![System Info](https://via.placeholder.com/800x450.png?text=Add+System+Info+Screenshot)
+![Performance Graph]
+<img width="1280" height="939" alt="2025-12-27_00 17 55" src="https://github.com/user-attachments/assets/7fb3af34-6a97-462f-9a49-459d1e54a328" />
 
 ## 🔧 Configuration Example
 ```cfg
