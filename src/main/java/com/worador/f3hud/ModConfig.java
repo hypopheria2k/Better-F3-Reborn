@@ -162,7 +162,7 @@ public class ModConfig {
     public static class EventHandler {
         @SubscribeEvent
         public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
-            if (event.getModID().equals("f3hud")) {
+            if (event.getModID().equals("betterf3reborn")) {
                 ConfigManager.sync("f3hud", Config.Type.INSTANCE);
             }
         }
