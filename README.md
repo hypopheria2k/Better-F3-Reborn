@@ -6,6 +6,8 @@
 
 A modern, feature-rich debug HUD overhaul for Minecraft 1.12.2 - bringing Better F3's clean design to older versions!
 
+
+
 <img width="1280" height="939" alt="2025-12-27_00 17 43" src="https://github.com/user-attachments/assets/c3151e81-33dc-453d-84d1-b82ef4f4b11c" />
 
 ## ✨ Features
