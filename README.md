@@ -63,11 +63,9 @@ Edit `config/f3hud.cfg` to customize:
 ## 🖼️ Screenshots
 
 ### Main HUD
-![Main HUD]
 <img width="1280" height="939" alt="2025-12-27_00 18 08" src="https://github.com/user-attachments/assets/c5d21bdc-c734-43d0-87b3-8fc572a8ebd7" />
 
 ### Performance Graph
-![Performance Graph]
 <img width="1280" height="939" alt="2025-12-27_00 17 55" src="https://github.com/user-attachments/assets/7fb3af34-6a97-462f-9a49-459d1e54a328" />
 
 ## 🔧 Configuration Example
