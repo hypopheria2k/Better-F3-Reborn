@@ -1,0 +1,16 @@
+[
+{
+  "modid": "f3hud",
+  "name": "Better F3 Reborn",
+  "description": "A faithful replica of BetterF3 for Minecraft 1.12.2.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Worador"],
+  "credits": "Original BetterF3 Team for the design inspiration.",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
