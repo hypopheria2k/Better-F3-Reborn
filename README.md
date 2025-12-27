@@ -99,6 +99,8 @@ animation {
 ```
 
 ## 🛠️ Building from Source
+### Prerequisites
+**Java 8 JDK**: Required for compiling Minecraft 1.12.2 mods. (Recommended: [Temurin 8](https://adoptium.net/temurin/releases/?version=8))
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/better-f3-reborn.git
