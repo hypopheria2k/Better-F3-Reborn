@@ -119,7 +119,7 @@ Better F3 is an amazing mod for modern Minecraft versions, but 1.12.2 modpacks s
 
 ## 🙏 Credits
 
-- Inspired by [Better F3]([https://modrinth.com/mod/betterf3](https://www.curseforge.com/minecraft/mc-mods/betterf3) by cominixo
+- Inspired by [Better F3 Modrinth](https://modrinth.com/mod/betterf3) [Better F3 Curseforge](https://www.curseforge.com/minecraft/mc-mods/betterf3) by cominixo
 - Created with assistance from Claude (Anthropic)
 - Built for the 1.12.2 modding community
 
