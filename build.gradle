@@ -13,7 +13,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = "1.0"
+version = "1.0.1"
 group = "com.worador.f3hud" // Dein Package-Name
 archivesBaseName = "BetterF3Reborn" // Der Name der JAR-Datei
 
@@ -126,4 +126,5 @@ jar {
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
+
 }
