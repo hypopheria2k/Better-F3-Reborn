@@ -49,7 +49,7 @@ Take full control over your debug interface:
 
 ## 📥 Installation
 
-1. Download the mod from [CurseForge](https://www.curseforge.com](https://www.curseforge.com/minecraft/mc-mods/better-f3-reborn)) or [Modrinth](https://modrinth.com/mod/better-f3-reborn).
+1. Download the mod from [CurseForge](https://www.curseforge.com/minecraft/mc-mods/better-f3-reborn) or [Modrinth](https://modrinth.com/mod/better-f3-reborn).
 2. Install [Minecraft Forge 1.12.2](https://files.minecraftforge.net/net/minecraftforge/forge/index_1.12.2.html) (recommended: 14.23.5.2859).
 3. Place the `.jar` file in your `.minecraft/mods` folder.
 4. Launch Minecraft and press **F3** to see the new HUD!
