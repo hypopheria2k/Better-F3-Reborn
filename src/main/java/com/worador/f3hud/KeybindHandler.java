@@ -18,17 +18,20 @@ public class KeybindHandler {
     public static KeyBinding toggleEntities;
     public static KeyBinding toggleSystem;
     public static KeyBinding toggleGraph;
+    public static KeyBinding toggleCompass; // NEU
 
     public KeybindHandler() {
         toggleCoords = new KeyBinding("Toggle Coordinates", Keyboard.KEY_NONE, CATEGORY);
         toggleEntities = new KeyBinding("Toggle Entities", Keyboard.KEY_NONE, CATEGORY);
         toggleSystem = new KeyBinding("Toggle System Info", Keyboard.KEY_NONE, CATEGORY);
         toggleGraph = new KeyBinding("Toggle Performance Graph", Keyboard.KEY_NONE, CATEGORY);
+        toggleCompass = new KeyBinding("Toggle Compass", Keyboard.KEY_NONE, CATEGORY); // NEU
 
         ClientRegistry.registerKeyBinding(toggleCoords);
         ClientRegistry.registerKeyBinding(toggleEntities);
         ClientRegistry.registerKeyBinding(toggleSystem);
         ClientRegistry.registerKeyBinding(toggleGraph);
+        ClientRegistry.registerKeyBinding(toggleCompass); // NEU
     }
 
     @SubscribeEvent
@@ -56,6 +59,12 @@ public class KeybindHandler {
             // Kopplung an forceOpen: Graph an = HUD bleibt offen
             ModConfig.forceOpen = ModConfig.modules.showPerformanceGraph;
             sendToggleMessage("Performance Graph", ModConfig.modules.showPerformanceGraph);
+        }
+
+        // NEU: Compass Toggle über eigene Taste
+        if (toggleCompass.isPressed()) {
+            ModConfig.modules.showCompass = !ModConfig.modules.showCompass;
+            sendToggleMessage("Compass", ModConfig.modules.showCompass);
         }
     }
 
@@ -96,6 +105,9 @@ public class KeybindHandler {
             } else if (keyCode == Keyboard.KEY_F) {
                 ModConfig.modules.showFPS = !ModConfig.modules.showFPS;
                 sendToggleMessage("FPS Display", ModConfig.modules.showFPS);
+            } else if (keyCode == Keyboard.KEY_K) { // NEU: F3 + K
+                ModConfig.modules.showCompass = !ModConfig.modules.showCompass;
+                sendToggleMessage("Compass", ModConfig.modules.showCompass);
             }
         }
     }

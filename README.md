@@ -53,6 +53,7 @@ Take full control over your debug interface:
   - **F3 + S** - Toggle System Info
   - **F3 + W** - Toggle World Info
   - **F3 + R** - Toggle Rotation
+  - **F3 + K** - Toggle Compass
   - **F3 + T** - Toggle Targeted Block
   - **F3 + D** - Toggle Dimension
   - **F3 + F** - Toggle FPS Display

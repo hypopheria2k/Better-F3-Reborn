@@ -18,7 +18,6 @@ public class DebugRenderer {
     private float animProgress = 0.0f;
     private final PerformanceGraph performanceGraph = new PerformanceGraph();
 
-    // NEU: Verhindert den sofortigen Reset beim Loslassen der F3+X Kombi
     private boolean f3WasDown = false;
 
     private final List<InfoModule> leftModules = new ArrayList<>();
@@ -35,10 +34,11 @@ public class DebugRenderer {
         leftModules.add(new EntitiesModule());
         leftModules.add(new PerformanceModule());
 
-        // Mod-Compatibility Module (Sicherheits-Check!)
         if (net.minecraftforge.fml.common.Loader.isModLoaded("stellar_core")) {
             leftModules.add(new com.worador.f3hud.StellarModule());
         }
+
+        leftModules.add(new CompassModule()); // NEU REGISTRIERT
 
         // RECHTE SEITE
         rightModules.add(new SystemModule());
@@ -117,10 +117,6 @@ public class DebugRenderer {
 
         boolean f3IsDown = Keyboard.isKeyDown(Keyboard.KEY_F3);
 
-        // LOGIK-FIX:
-        // Wir prüfen, ob F3 NEU gedrückt wurde (Transition false -> true).
-        // Wenn das passiert, während forceOpen aktiv ist, schalten wir es aus,
-        // außer man drückt gleichzeitig X (für die Aktivierung).
         if (f3IsDown && !f3WasDown && ModConfig.forceOpen) {
             if (!Keyboard.isKeyDown(Keyboard.KEY_X)) {
                 ModConfig.forceOpen = false;
@@ -128,7 +124,6 @@ public class DebugRenderer {
             }
         }
 
-        // Status für den nächsten Frame merken
         f3WasDown = f3IsDown;
 
         float speed = (float) ModConfig.animation.animationSpeed;
@@ -170,6 +165,14 @@ public class DebugRenderer {
         boolean firstModule = true;
         for (InfoModule module : leftModules) {
             if (!module.isEnabled()) continue;
+
+            // Wenn es der Kompass ist, zeichnen wir ihn grafisch
+            if (module instanceof CompassModule) {
+                drawCompass(x, y);
+                y += 17; // Platz für den Balken
+                continue;
+            }
+
             if (!firstModule) y += 5;
             firstModule = false;
 
@@ -186,6 +189,59 @@ public class DebugRenderer {
         }
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
         GlStateManager.popMatrix();
+    }
+
+    // NEUE METHODE FÜR DEN GRAFISCHEN KOMPASS
+    private void drawCompass(int x, int y) {
+        int width = 100;
+        int height = 12;
+        int alpha = (int)(animProgress * ModConfig.animation.backgroundAlpha) << 24;
+
+        // 1. Rahmen und Hintergrund
+        Gui.drawRect(x - 2, y - 2, x + width + 2, y + height + 2, alpha | 0x000000);
+        Gui.drawRect(x - 1, y - 1, x + width + 1, y + height + 1, alpha | 0x888888);
+        Gui.drawRect(x, y, x + width, y + height, alpha | 0x222222);
+
+        float yaw = mc.player.rotationYaw % 360;
+        if (yaw < 0) yaw += 360;
+
+        // 2. Skala und Richtungen rendern
+        // Wir definieren alle 8 Richtungen in einem Array
+        String[] allDirs = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+
+        for (int i = 0; i < 16; i++) { // 16 Schritte à 22.5 Grad
+            float angle = i * 22.5f;
+            float diff = angle - yaw;
+            while (diff > 180) diff -= 360;
+            while (diff < -180) diff += 360;
+
+            if (Math.abs(diff) < 45) { // Nur im Sichtfeld des Balkens
+                int posX = x + (width / 2) + (int)(diff * (width / 90.0));
+
+                if (i % 4 == 0) {
+                    // Hauptrichtungen (N, E, S, W) - i ist 0, 4, 8, 12
+                    String name = allDirs[i / 2];
+                    mc.fontRenderer.drawStringWithShadow(name, posX - (mc.fontRenderer.getStringWidth(name) / 2), y + 2, 0xFFFFFFFF);
+                    Gui.drawRect(posX, y, posX + 1, y + 3, alpha | 0xFFFFFF);
+                } else if (i % 2 == 0) {
+                    // Zwischenrichtungen (NE, SE, SW, NW) - i ist 2, 6, 10, 14
+                    String name = allDirs[i / 2];
+                    GlStateManager.pushMatrix();
+                    GlStateManager.scale(0.7, 0.7, 1.0);
+                    int subX = (int)(posX / 0.7);
+                    int subY = (int)((y + 4) / 0.7);
+                    mc.fontRenderer.drawStringWithShadow(name, subX - (mc.fontRenderer.getStringWidth(name) / 2), subY, 0xCCCCCC);
+                    GlStateManager.popMatrix();
+                    Gui.drawRect(posX, y, posX + 1, y + 2, alpha | 0xCCCCCC);
+                } else {
+                    // Kleine Teilstriche (22.5 Grad Schritte)
+                    Gui.drawRect(posX, y, posX + 1, y + 1, alpha | 0xAAAAAA);
+                }
+            }
+        }
+
+        // 3. Rote Markierung (Mitte)
+        Gui.drawRect(x + (width / 2), y - 1, x + (width / 2) + 1, y + height + 1, 0xFFFF0000);
     }
 
     private void renderRightSide(ScaledResolution sr) {
