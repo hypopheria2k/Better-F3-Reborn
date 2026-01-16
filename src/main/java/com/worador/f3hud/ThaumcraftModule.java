@@ -1,14 +1,14 @@
 package com.worador.f3hud;
 
-import com.worador.f3hud.InfoModule;
-import com.worador.f3hud.ModConfig;
-import com.worador.f3hud.compat.ThaumcraftCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Loader; // WICHTIG
 
 import java.util.ArrayList;
 import java.util.List;
+
+// IMPORT VON ThaumcraftCompat ENTFERNEN!
 
 public class ThaumcraftModule extends InfoModule {
 
@@ -21,8 +21,8 @@ public class ThaumcraftModule extends InfoModule {
     public List<InfoLine> getLines() {
         List<InfoLine> lines = new ArrayList<>();
 
-        // Prüfung, ob das Modul in der Config aktiviert ist
-        if (!ModConfig.modules.showThaumcraft) {
+        // Prüfung, ob das Modul in der Config aktiviert ist UND ob die Mod überhaupt existiert
+        if (!ModConfig.modules.showThaumcraft || !Loader.isModLoaded("thaumcraft")) {
             return lines;
         }
 
@@ -31,8 +31,8 @@ public class ThaumcraftModule extends InfoModule {
         World world = mc.world;
 
         if (player != null && world != null) {
-            // Aufruf der Compat-Klasse für Vis und Flux
-            lines.addAll(ThaumcraftCompat.getThaumcraftLines(player, world));
+            // Vollqualifizierter Aufruf, um den Classloader erst bei Bedarf zu triggern
+            lines.addAll(com.worador.f3hud.compat.ThaumcraftCompat.getThaumcraftLines(player, world));
         }
 
         return lines;

@@ -70,6 +70,12 @@ public class ModConfig {
         @Config.Comment("Show Compass")
         public boolean showCompass = true;
 
+        @Config.Comment("Show Astral Sorcery Info (Starlight & Constellations)")
+        public boolean showAstralSorcery = true;
+
+        @Config.Comment("Show StellarCore Time and Day Info")
+        public boolean showStellar = true;
+
         @Config.Comment("Show Botania Mana Info (Player & Pools)")
         public boolean showBotania = true;
 

@@ -32,19 +32,32 @@ public class DebugRenderer {
         leftModules.add(new DimensionModule());
         leftModules.add(new RegionModule());
         leftModules.add(new TargetedBlockModule());
-        //leftModules.add(new ServerModule()); <-- Temp. Disabled
         leftModules.add(new EntitiesModule());
         leftModules.add(new PerformanceModule());
 
-        // Mod-Compatibility Module
-        leftModules.add(new com.worador.f3hud.compat.StellarCompat());
+        // Mod-Compatibility Module (Sicherheits-Check!)
+        if (net.minecraftforge.fml.common.Loader.isModLoaded("stellar_core")) {
+            leftModules.add(new com.worador.f3hud.StellarModule());
+        }
 
         // RECHTE SEITE
         rightModules.add(new SystemModule());
-        rightModules.add(new com.worador.f3hud.compat.AstralCompat());
-        rightModules.add(new BotaniaModule());
-        rightModules.add(new BloodMagicModule());
-        rightModules.add(new ThaumcraftModule());
+
+        if (net.minecraftforge.fml.common.Loader.isModLoaded("astralsorcery")) {
+            rightModules.add(new com.worador.f3hud.AstralModule());
+        }
+
+        if (net.minecraftforge.fml.common.Loader.isModLoaded("botania")) {
+            rightModules.add(new BotaniaModule());
+        }
+
+        if (net.minecraftforge.fml.common.Loader.isModLoaded("bloodmagic")) {
+            rightModules.add(new BloodMagicModule());
+        }
+
+        if (net.minecraftforge.fml.common.Loader.isModLoaded("thaumcraft")) {
+            rightModules.add(new ThaumcraftModule());
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
