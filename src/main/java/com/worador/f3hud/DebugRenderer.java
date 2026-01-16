@@ -32,11 +32,19 @@ public class DebugRenderer {
         leftModules.add(new DimensionModule());
         leftModules.add(new RegionModule());
         leftModules.add(new TargetedBlockModule());
-        leftModules.add(new ServerModule());
+        //leftModules.add(new ServerModule()); <-- Temp. Disabled
         leftModules.add(new EntitiesModule());
+        leftModules.add(new PerformanceModule());
+
+        // Mod-Compatibility Module
+        leftModules.add(new com.worador.f3hud.compat.StellarCompat());
 
         // RECHTE SEITE
         rightModules.add(new SystemModule());
+        rightModules.add(new com.worador.f3hud.compat.AstralCompat());
+        rightModules.add(new BotaniaModule());
+        rightModules.add(new BloodMagicModule());
+        rightModules.add(new ThaumcraftModule());
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)

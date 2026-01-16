@@ -5,11 +5,21 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Java CI with Gradle](https://github.com/hypopheria2k/better-f3-reborn/actions/workflows/gradle-publish.yml/badge.svg)](https://github.com/hypopheria2k/better-f3-reborn/actions)
 
+**⚠️ Note on Branch Structure:** The original codebase has been moved to the `main-legacy` branch. The current `main` branch now contains the new modular system with expanded magic mod compatibility and real-time performance tracking.
+
 A modern, feature-rich debug HUD overhaul for Minecraft 1.12.2 - bringing Better F3's clean design to older versions!
 
 <img width="1280" height="939" alt="Better F3 Reborn Preview" src="https://github.com/user-attachments/assets/c3151e81-33dc-453d-84d1-b82ef4f4b11c" />
 
 ## ✨ Features
+
+### 🛠️ New: Advanced Mod Compatibility (v2.0.0)
+The HUD now features deep integration for popular 1.12.2 magic and tech mods:
+- **Thaumcraft:** Real-time Aura Vis/Flux levels, Warp tracking, and scanned Aspects.
+- **Botania:** Precise Mana tracking for Tablets and Buffers.
+- **Blood Magic:** LP Network monitoring and Altar capacity.
+- **Astral Sorcery:** Starlight concentration and Celestial data.
+- **Performance Engine:** Real-time **TPS** and **MSPT** (Milliseconds Per Tick) tracking with dynamic color-coding (Green/Yellow/Red) based on actual server load.
 
 ### 🛠️ Fixed & Polished (v1.1.0)
 - **No More Debug Leak:** Fixed issues where other mods would "leak" their vanilla debug information into the HUD. It now provides a clean, isolated experience even in large modpacks.
@@ -37,15 +47,16 @@ A modern, feature-rich debug HUD overhaul for Minecraft 1.12.2 - bringing Better
 Take full control over your debug interface:
 - **Native Keybinding Support:** All F3-shortcuts are now registered in the standard Minecraft **Controls** menu. You can rebind any toggle to your preferred key!
 - **Default Shortcuts (F3 + Key):**
-    - **F3 + X** - Toggle Performance Graph (Locks HUD open)
-    - **F3 + C** - Toggle Coordinates
-    - **F3 + E** - Toggle Entities
-    - **F3 + S** - Toggle System Info
-    - **F3 + W** - Toggle World Info
-    - **F3 + R** - Toggle Rotation
-    - **F3 + T** - Toggle Targeted Block
-    - **F3 + D** - Toggle Dimension
-    - **F3 + F** - Toggle FPS Display
+  - **F3 + X** - Toggle Performance Graph (Locks HUD open)
+  - **F3 + C** - Toggle Coordinates
+  - **F3 + E** - Toggle Entities
+  - **F3 + S** - Toggle System Info
+  - **F3 + W** - Toggle World Info
+  - **F3 + R** - Toggle Rotation
+  - **F3 + T** - Toggle Targeted Block
+  - **F3 + D** - Toggle Dimension
+  - **F3 + F** - Toggle FPS Display
+  - **F3 + M** - Toggle Magic/Mod Modules (New in v2.0.0)
 
 ## 📥 Installation
 
@@ -78,15 +89,15 @@ git clone [https://github.com/hypopheria2k/better-f3-reborn.git](https://github.
 cd better-f3-reborn
 
 # Build with Gradle
-./gradlew build
+./gradlew clean build
 ```
 
 🙏 Credits & Compatibility
 
-    Inspired by Better F3 by cominixo.
-
-    Compatibility tested with: Astral Sorcery, Baubles, BetterFps, BlahajASM, EntityCulling, FPS Reducer, FermiumBooter, FoamFix, GPUTape, InGame Info XML, LunatriusCore, MixinBooter, Stellar Sky.
-
+Inspired by Better F3 by cominixo.
+```
+Compatibility tested with: Astral Sorcery, Blood Magic, Botania, Thaumcraft, Stellar API, Baubles, BetterFps, BlahajASM, EntityCulling, FPS Reducer, FermiumBooter, FoamFix, GPUTape, InGame Info XML, LunatriusCore, MixinBooter, Stellar Sky.
+```
 📜 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.

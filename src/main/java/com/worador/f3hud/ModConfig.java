@@ -56,7 +56,7 @@ public class ModConfig {
         public boolean showTargetedBlock = true;
 
         @Config.Comment("Show Server Info")
-        public boolean showServer = true;
+        public boolean showServer = false;
 
         @Config.Comment("Show Entities Info (Particles, Monsters, Creatures)")
         public boolean showEntities = true;
@@ -69,6 +69,18 @@ public class ModConfig {
 
         @Config.Comment("Show Compass")
         public boolean showCompass = true;
+
+        @Config.Comment("Show Botania Mana Info (Player & Pools)")
+        public boolean showBotania = true;
+
+        @Config.Comment("Show Blood Magic Info (Soul Network & Altar)")
+        public boolean showBloodMagic = true;
+
+        @Config.Comment("Show Thaumcraft Aura Info (Vis & Flux)")
+        public boolean showThaumcraft = true;
+
+        @Config.Comment("Show Server Tick Rate")
+        public boolean showPerformance = true;
     }
 
     public static class Colors {
@@ -85,10 +97,12 @@ public class ModConfig {
         public int colorCreatures = 0x55FF55;
         public int colorSystem = 0x55FFFF;
         public int colorDefault = 0xFFFFFF;
+        public int colorBotania = 0x00FFFF;
+        public int colorBloodMagic = 0xFF0000;
     }
 
     public static class Position {
-        public double scale = 0.75;
+        public double scale = 0.70;
         public int leftOffsetX = 4;
         public int leftOffsetY = 4;
         public int rightOffsetX = 4;
