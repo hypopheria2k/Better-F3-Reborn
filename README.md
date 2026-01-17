@@ -5,7 +5,8 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Java CI with Gradle](https://github.com/hypopheria2k/better-f3-reborn/actions/workflows/gradle-publish.yml/badge.svg)](https://github.com/hypopheria2k/better-f3-reborn/actions)
 
-**⚠️ Note on Branch Structure:** The original codebase has been moved to the `main-legacy` branch. The current `main` branch now contains the new modular system with expanded magic mod compatibility and real-time performance tracking.
+**⚠️ Note ** The original codebase has been moved to GitLab. Github will never be updated and stay on the old Codebase.
+New Repository with updated code: https://gitlab.com/hypopheria/better-f3-reborn
 
 A modern, feature-rich debug HUD overhaul for Minecraft 1.12.2 - bringing Better F3's clean design to older versions!
 
