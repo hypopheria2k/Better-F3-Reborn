@@ -1,0 +1,75 @@
+buildscript {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net/' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
+    }
+}
+        
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+
+version = "1.12.2-V2.0.1"
+group = "com.worador.f3hud" 
+archivesBaseName = "BetterF3Reborn" 
+
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' 
+
+minecraft {
+    mappings channel: 'snapshot', version: '20171003-1.12'
+    
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+        }
+
+        server {
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+        }
+    }
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2859'
+    // StellarCore lokal einbinden (wichtig: Dateiname exakt wie im libs-Ordner)
+    compileOnly files('libs/StellarCore-1.5.22.jar')
+    compileOnly files('libs/astralsorcery-1.12.2-1.10.27.jar')
+    compileOnly files('libs/Botania_r1.10-364.4.jar')
+    compileOnly files('libs/BloodMagic-1.12.2-2.4.3-105.jar')
+    compileOnly files('libs/Thaumcraft-1.12.2-6.1.BETA26.jar')
+}
+
+jar {
+    manifest {
+        attributes([
+                "Specification-Title": "Better F3 Reloaded",
+                "Specification-Vendor": "worador",
+                "Specification-Version": "1.1",
+                "Implementation-Title": project.name,
+                "Implementation-Version": "${version}",
+                "Implementation-Vendor" :"worador",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+jar.finalizedBy('reobfJar') 
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file:///${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
