@@ -9,6 +9,7 @@
 
 A modern, feature-rich debug HUD overhaul for Minecraft 1.12.2 – bringing Better F3's clean design to the golden age of modding.
 
+<img width="640" height="480" alt="2026-01-18_19 31 05" src="https://github.com/user-attachments/assets/f27791bc-6ebb-4eb5-a50b-dfc4ebb93ba4" />
 
 ## ✨ New in Version 2.1.0+
 
@@ -87,3 +88,6 @@ cd better-f3-reborn
 📜 License: MIT - Feel free to use it in any modpack!
 
 Made with ❤️ for the Minecraft 1.12.2 community.
+
+<img width="640" height="480" alt="2026-01-18_19 30 49" src="https://github.com/user-attachments/assets/cac7f361-6777-4552-9f40-6b1858f902f2" />
+
