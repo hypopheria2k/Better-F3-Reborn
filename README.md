@@ -15,9 +15,7 @@ A modern, feature-rich debug HUD overhaul for Minecraft 1.12.2 – bringing Bett
 
 Need help? Have a suggestion for a new module? Join our official Discord server!
 
-[![Discord](https://img.shields.io/discord/1330248883653152799?color=7289da&label=Discord&logo=discord&logoColor=white)](https://discord.gg/gVHefyjsRg)
-
-**[Join the Discord Server](https://discord.gg/gVHefyjsRg)**
+**[![Join our Discord](https://img.shields.io/badge/Discord-Join%20our%20Server-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/gVHefyjsRg)**
 
 ## ✨ New in Version 2.1.0+
 
