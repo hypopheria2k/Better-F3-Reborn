@@ -11,6 +11,14 @@ A modern, feature-rich debug HUD overhaul for Minecraft 1.12.2 – bringing Bett
 
 <img width="640" height="480" alt="2026-01-18_19 31 05" src="https://github.com/user-attachments/assets/f27791bc-6ebb-4eb5-a50b-dfc4ebb93ba4" />
 
+## 💬 Community & Support
+
+Need help? Have a suggestion for a new module? Join our official Discord server!
+
+[![Discord](https://img.shields.io/discord/1330248883653152799?color=7289da&label=Discord&logo=discord&logoColor=white)](https://discord.gg/gVHefyjsRg)
+
+**[Join the Discord Server](https://discord.gg/gVHefyjsRg)**
+
 ## ✨ New in Version 2.1.0+
 
 - **Optimized System Info:** Drastically cleaned up GPU strings, especially for Linux/Mesa users (e.g., Ryzen APUs), to prevent HUD clutter.
