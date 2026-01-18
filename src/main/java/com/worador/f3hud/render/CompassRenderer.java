@@ -48,7 +48,7 @@ public class CompassRenderer implements IModuleRenderer {
             }
         }
 
-        // Die Nadel: Nur ein feiner weißer Strich in der Mitte
-        Gui.drawRect(x + (width / 2), y - 2, x + (width / 2) + 1, y + height + 2, 0xFFFFFFFF);
+        // Die Nadel: Nur ein feiner roter Strich in der Mitte
+        Gui.drawRect(x + (width / 2), y - 2, x + (width / 2) + 1, y + height + 2, 0xFFFF4444);
     }
 }

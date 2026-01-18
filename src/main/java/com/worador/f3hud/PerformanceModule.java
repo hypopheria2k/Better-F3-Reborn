@@ -12,27 +12,25 @@ public class PerformanceModule extends InfoModule {
 
     @Override
     protected boolean isEnabledInConfig() {
-        // Nutzt deine bestehende Config-Option
+        // Nutzt die zentrale Config-Option für den Graphen
         return ModConfig.modules.showPerformanceGraph;
     }
 
     @Override
     public List<InfoLine> getLines() {
-        // Da der Graph direkt via GraphRenderer gezeichnet wird,
-        // braucht dieses Modul selbst keine Textzeilen.
+        // Der Graph wird separat gerendert, daher keine Textzeilen
         return new ArrayList<>();
     }
 
     @Override
     public int getHeight() {
-        // Der Graph im Renderer ist 60px hoch + Padding.
-        // Wir reservieren 75px, damit nachfolgende Module einen sauberen Abstand haben.
+        // 60px für den Graphen + 15px Padding für das nächste Modul
         return 75;
     }
 
     @Override
     public int getMaxLineWidth() {
-        // Unser Graph ist auf 200px Breite festgesetzt.
+        // Entspricht der festen Breite des Graphen
         return 200;
     }
 }

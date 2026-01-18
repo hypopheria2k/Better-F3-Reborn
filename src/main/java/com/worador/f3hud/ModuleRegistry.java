@@ -44,7 +44,8 @@ public class ModuleRegistry {
 
     public static InfoModule getGraphModule() {
         for (InfoModule m : LEFT) {
-            if (m instanceof PerformanceGraphModule) return m;
+            // Geändert von PerformanceGraphModule auf PerformanceModule
+            if (m instanceof PerformanceModule) return m;
         }
         return null;
     }

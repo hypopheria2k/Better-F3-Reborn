@@ -13,16 +13,17 @@ public class StellarModule extends InfoModule {
 
     @Override
     protected boolean isEnabledInConfig() {
-        // Hier könntest du in der ModConfig noch 'showStellar' hinzufügen,
-        // falls gewünscht. Aktuell prüfen wir nur, ob die Mod da ist.
-        return Loader.isModLoaded("stellar_core");
+        // Prüft, ob die Mod installiert ist UND ob sie in der Config aktiviert wurde
+        return Loader.isModLoaded("stellar_core") && ModConfig.modules.showStellar;
     }
 
     @Override
     public List<InfoLine> getLines() {
         List<InfoLine> lines = new ArrayList<>();
 
-        if (Loader.isModLoaded("stellar_core") && mc.world != null) {
+        // Da isEnabledInConfig bereits den Mod-Check macht,
+        // müssen wir hier nur noch sicherstellen, dass die Welt geladen ist.
+        if (mc.world != null) {
             // Aufruf der Logik im compat-Paket
             lines.addAll(com.worador.f3hud.compat.StellarCompat.getStellarLines(mc.world));
         }

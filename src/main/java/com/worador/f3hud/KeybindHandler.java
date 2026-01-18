@@ -11,88 +11,105 @@ import org.lwjgl.input.Keyboard;
 
 public class KeybindHandler {
     private final Minecraft mc = Minecraft.getMinecraft();
-    private static final String CATEGORY = "Better F3 Reborn";
 
-    public static KeyBinding toggleCoords;
-    public static KeyBinding toggleSystem;
-    public static KeyBinding toggleGraph;
+    // Nutzt jetzt den Key aus der .lang Datei für die Kategorieüberschrift
+    private static final String CATEGORY = "key.categories.betterf3reborn";
+
+    public static KeyBinding kbCoords, kbSystem, kbGraph, kbCompass, kbFPS, kbRotation;
+    public static KeyBinding kbWorld, kbEntities, kbTargeted, kbDimension, kbMagic;
 
     public KeybindHandler() {
-        toggleCoords = new KeyBinding("Toggle Coordinates", Keyboard.KEY_NONE, CATEGORY);
-        toggleSystem = new KeyBinding("Toggle System Info", Keyboard.KEY_NONE, CATEGORY);
-        toggleGraph = new KeyBinding("Toggle Performance Graph", Keyboard.KEY_NONE, CATEGORY);
+        // Die Namen nutzen jetzt ebenfalls Sprach-Keys
+        kbCoords = new KeyBinding("key.toggle.coordinates", Keyboard.KEY_NONE, CATEGORY);
+        kbSystem = new KeyBinding("key.toggle.system", Keyboard.KEY_NONE, CATEGORY);
+        kbGraph = new KeyBinding("key.toggle.graph", Keyboard.KEY_NONE, CATEGORY);
+        kbCompass = new KeyBinding("key.toggle.compass", Keyboard.KEY_NONE, CATEGORY);
+        kbFPS = new KeyBinding("key.toggle.fps", Keyboard.KEY_NONE, CATEGORY);
+        kbRotation = new KeyBinding("key.toggle.rotation", Keyboard.KEY_NONE, CATEGORY);
+        kbWorld = new KeyBinding("key.toggle.world", Keyboard.KEY_NONE, CATEGORY);
+        kbEntities = new KeyBinding("key.toggle.entities", Keyboard.KEY_NONE, CATEGORY);
+        kbTargeted = new KeyBinding("key.toggle.targeted", Keyboard.KEY_NONE, CATEGORY);
+        kbDimension = new KeyBinding("key.toggle.dimension", Keyboard.KEY_NONE, CATEGORY);
+        kbMagic = new KeyBinding("key.toggle.magic", Keyboard.KEY_NONE, CATEGORY);
 
-        ClientRegistry.registerKeyBinding(toggleCoords);
-        ClientRegistry.registerKeyBinding(toggleSystem);
-        ClientRegistry.registerKeyBinding(toggleGraph);
+        ClientRegistry.registerKeyBinding(kbCoords);
+        ClientRegistry.registerKeyBinding(kbSystem);
+        ClientRegistry.registerKeyBinding(kbGraph);
+        ClientRegistry.registerKeyBinding(kbCompass);
+        ClientRegistry.registerKeyBinding(kbFPS);
+        ClientRegistry.registerKeyBinding(kbRotation);
+        ClientRegistry.registerKeyBinding(kbWorld);
+        ClientRegistry.registerKeyBinding(kbEntities);
+        ClientRegistry.registerKeyBinding(kbTargeted);
+        ClientRegistry.registerKeyBinding(kbDimension);
+        ClientRegistry.registerKeyBinding(kbMagic);
     }
 
     @SubscribeEvent
     public void onKeyInput(InputEvent.KeyInputEvent event) {
-        // F3-Kombinationen abfangen
         if (Keyboard.isKeyDown(Keyboard.KEY_F3)) {
             handleF3Combinations();
             return;
         }
-
-        // Normale Keybinds aus dem Minecraft-Menü
-        if (toggleCoords.isPressed()) {
-            ModConfig.modules.showCoordinates = !ModConfig.modules.showCoordinates;
-            sendToggleMessage("Coordinates", ModConfig.modules.showCoordinates);
-        }
-        if (toggleSystem.isPressed()) {
-            ModConfig.modules.showSystem = !ModConfig.modules.showSystem;
-            sendToggleMessage("System Info", ModConfig.modules.showSystem);
-        }
-        if (toggleGraph.isPressed()) {
-            togglePerformanceGraph();
-        }
+        checkCustomKeybinds();
     }
 
     private void handleF3Combinations() {
-        // EventKeyState prüft, ob die Taste gerade GEDRÜCKT wurde (verhindert Mehrfach-Trigger)
         if (Keyboard.getEventKeyState() && !Keyboard.isRepeatEvent()) {
             int keyCode = Keyboard.getEventKey();
-
             switch (keyCode) {
-                case Keyboard.KEY_C:
-                    ModConfig.modules.showCoordinates = !ModConfig.modules.showCoordinates;
-                    sendToggleMessage("Coordinates", ModConfig.modules.showCoordinates);
-                    break;
-                case Keyboard.KEY_S:
-                    ModConfig.modules.showSystem = !ModConfig.modules.showSystem;
-                    sendToggleMessage("System Info", ModConfig.modules.showSystem);
-                    break;
-                case Keyboard.KEY_X: // Dein Kürzel für den Graph
-                    togglePerformanceGraph();
-                    break;
-                case Keyboard.KEY_K: // Kompass
-                    ModConfig.modules.showCompass = !ModConfig.modules.showCompass;
-                    sendToggleMessage("Compass", ModConfig.modules.showCompass);
-                    break;
-                case Keyboard.KEY_F: // FPS Zeile
-                    ModConfig.modules.showFPS = !ModConfig.modules.showFPS;
-                    sendToggleMessage("FPS Display", ModConfig.modules.showFPS);
-                    break;
-                case Keyboard.KEY_G: // Klassisches Minecraft Kürzel für Graph
-                    togglePerformanceGraph();
-                    break;
-                case Keyboard.KEY_Q:
-                    sendHelpMessage();
-                    break;
+                case Keyboard.KEY_C: toggle("Coordinates", !ModConfig.modules.showCoordinates); break;
+                case Keyboard.KEY_S: toggle("System Info", !ModConfig.modules.showSystem); break;
+                case Keyboard.KEY_X: case Keyboard.KEY_G: togglePerformanceGraph(); break;
+                case Keyboard.KEY_K: toggle("Compass", !ModConfig.modules.showCompass); break;
+                case Keyboard.KEY_F: toggle("FPS Display", !ModConfig.modules.showFPS); break;
+                case Keyboard.KEY_R: toggle("Rotation", !ModConfig.modules.showRotation); break;
+                case Keyboard.KEY_W: toggle("World Info", !ModConfig.modules.showWorld); break;
+                case Keyboard.KEY_E: toggle("Entities", !ModConfig.modules.showEntities); break;
+                case Keyboard.KEY_T: toggle("Targeted Block", !ModConfig.modules.showTargetedBlock); break;
+                case Keyboard.KEY_D: toggle("Dimension", !ModConfig.modules.showDimension); break;
+                case Keyboard.KEY_M: toggle("Magic Modules", !ModConfig.modules.showBotania); break;
+                case Keyboard.KEY_Q: sendHelpMessage(); break;
             }
         }
     }
 
+    private void checkCustomKeybinds() {
+        if (kbCoords.isPressed()) toggle("Coordinates", !ModConfig.modules.showCoordinates);
+        if (kbSystem.isPressed()) toggle("System Info", !ModConfig.modules.showSystem);
+        if (kbGraph.isPressed()) togglePerformanceGraph();
+        if (kbCompass.isPressed()) toggle("Compass", !ModConfig.modules.showCompass);
+        if (kbFPS.isPressed()) toggle("FPS Display", !ModConfig.modules.showFPS);
+        if (kbRotation.isPressed()) toggle("Rotation", !ModConfig.modules.showRotation);
+        if (kbWorld.isPressed()) toggle("World Info", !ModConfig.modules.showWorld);
+        if (kbEntities.isPressed()) toggle("Entities", !ModConfig.modules.showEntities);
+        if (kbTargeted.isPressed()) toggle("Targeted Block", !ModConfig.modules.showTargetedBlock);
+        if (kbDimension.isPressed()) toggle("Dimension", !ModConfig.modules.showDimension);
+        if (kbMagic.isPressed()) toggle("Magic Modules", !ModConfig.modules.showBotania);
+    }
+
+    private void toggle(String name, boolean newState) {
+        if (name.equals("Coordinates")) ModConfig.modules.showCoordinates = newState;
+        else if (name.equals("System Info")) ModConfig.modules.showSystem = newState;
+        else if (name.equals("Compass")) ModConfig.modules.showCompass = newState;
+        else if (name.equals("FPS Display")) ModConfig.modules.showFPS = newState;
+        else if (name.equals("Rotation")) ModConfig.modules.showRotation = newState;
+        else if (name.equals("World Info")) ModConfig.modules.showWorld = newState;
+        else if (name.equals("Entities")) ModConfig.modules.showEntities = newState;
+        else if (name.equals("Targeted Block")) ModConfig.modules.showTargetedBlock = newState;
+        else if (name.equals("Dimension")) ModConfig.modules.showDimension = newState;
+        else if (name.equals("Magic Modules")) {
+            ModConfig.modules.showBotania = newState;
+            ModConfig.modules.showThaumcraft = newState;
+            ModConfig.modules.showBloodMagic = newState;
+            ModConfig.modules.showAstralSorcery = newState;
+        }
+        sendToggleMessage(name, newState);
+    }
+
     private void togglePerformanceGraph() {
         ModConfig.modules.showPerformanceGraph = !ModConfig.modules.showPerformanceGraph;
-
-        // Fix: forceOpen nur umschalten, wenn wir F3 NICHT halten,
-        // damit man das HUD auch wieder schließen kann.
-        if (ModConfig.modules.showPerformanceGraph) {
-            ModConfig.forceOpen = true;
-        }
-
+        if (ModConfig.modules.showPerformanceGraph) ModConfig.forceOpen = true;
         sendToggleMessage("Performance Graph", ModConfig.modules.showPerformanceGraph);
     }
 
@@ -107,15 +124,7 @@ public class KeybindHandler {
 
     private void sendHelpMessage() {
         if (mc.player == null) return;
-
-        mc.player.sendMessage(new TextComponentString(TextFormatting.GOLD + "Better F3 Reborn - Key Bindings:"));
-        mc.player.sendMessage(new TextComponentString(TextFormatting.YELLOW + " F3 + Q: " + TextFormatting.WHITE + "Show this help list"));
-        mc.player.sendMessage(new TextComponentString(TextFormatting.YELLOW + " F3 + C: " + TextFormatting.WHITE + "Toggle Coordinates"));
-        mc.player.sendMessage(new TextComponentString(TextFormatting.YELLOW + " F3 + S: " + TextFormatting.WHITE + "Toggle System Info"));
-        mc.player.sendMessage(new TextComponentString(TextFormatting.YELLOW + " F3 + F: " + TextFormatting.WHITE + "Toggle FPS Display"));
-        mc.player.sendMessage(new TextComponentString(TextFormatting.YELLOW + " F3 + K: " + TextFormatting.WHITE + "Toggle Compass"));
-        mc.player.sendMessage(new TextComponentString(TextFormatting.YELLOW + " F3 + G: " + TextFormatting.WHITE + "Toggle Performance Graph"));
-        mc.player.sendMessage(new TextComponentString(TextFormatting.YELLOW + " F3 + X: " + TextFormatting.WHITE + "Fix Graph & HUD (Force Open)"));
+        mc.player.sendMessage(new TextComponentString(TextFormatting.GOLD + "Better F3 Reborn - Shortcuts (F3 + Key):"));
+        mc.player.sendMessage(new TextComponentString(TextFormatting.GRAY + "C, S, F, K, G/X, R, W, E, T, D, M"));
     }
-
 }
