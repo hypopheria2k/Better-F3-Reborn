@@ -1,0 +1,15 @@
+# Keybindings Kategorie
+key.categories.betterf3reborn=Better F3 Reborn
+
+# Keybinding Namen
+key.toggle.coordinates=Koordinaten umschalten
+key.toggle.system=System-Info umschalten
+key.toggle.graph=Performance-Graph umschalten
+key.toggle.compass=Kompass umschalten
+key.toggle.fps=FPS-Anzeige umschalten
+key.toggle.rotation=Rotation umschalten
+key.toggle.world=Welt-Info umschalten
+key.toggle.entities=Entities umschalten
+key.toggle.targeted=Zielblock-Info umschalten
+key.toggle.dimension=Dimension umschalten
+key.toggle.magic=Magie/Mod-Module umschalten
