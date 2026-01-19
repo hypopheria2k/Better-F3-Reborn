@@ -1,7 +1,10 @@
 package com.worador.f3hud.render;
 
 import com.worador.f3hud.InfoModule;
+import com.worador.f3hud.util.RenderUtils;
 import net.minecraft.client.Minecraft;
+
+import java.util.List;
 
 public class TextModuleRenderer implements IModuleRenderer {
 
@@ -9,21 +12,25 @@ public class TextModuleRenderer implements IModuleRenderer {
 
     @Override
     public void render(InfoModule module, int x, int y, float animProgress) {
-        if (module.getLines() == null || module.getLines().isEmpty()) return;
+        List<InfoModule.InfoLine> lines = module.getLines();
+        if (lines == null || lines.isEmpty()) return;
 
-        // Wir brauchen kein 'isRight' mehr für das Zeichnen,
-        // da der DebugRenderer das 'x' bereits perfekt übergibt.
+        // 1. Breite für den Hintergrund berechnen
+        int maxWidth = 0;
+        for (InfoModule.InfoLine line : lines) {
+            String full = (line.label != null ? line.label : "") + (line.value != null ? line.value : "");
+            maxWidth = Math.max(maxWidth, mc.fontRenderer.getStringWidth(full));
+        }
 
-        for (InfoModule.InfoLine line : module.getLines()) {
+        // 2. Hintergrund über zentrale Utility zeichnen (inkl. F3+J Check & Crash-Schutz)
+        RenderUtils.drawComponentBackground(x, y, maxWidth, lines.size() * 11, animProgress);
+
+        // 3. Text zeichnen
+        for (InfoModule.InfoLine line : lines) {
             String label = line.label != null ? line.label : "";
             String value = line.value != null ? line.value : "";
-            String full = label + value;
 
-            // KEIN Gui.drawRect mehr.
-            // drawStringWithShadow sorgt für perfekte Lesbarkeit auf jedem Untergrund.
-            mc.fontRenderer.drawStringWithShadow(full, x, y, line.color);
-
-            // 11 Pixel Zeilenabstand (9px Font + 2px Abstand)
+            mc.fontRenderer.drawStringWithShadow(label + value, x, y, line.color);
             y += 11;
         }
     }

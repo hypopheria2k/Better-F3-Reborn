@@ -64,7 +64,7 @@ public class ModConfig {
         @Config.LangKey("f3hud.config.modules.showSystem")
         public boolean showSystem = true;
 
-        @Config.Comment("Show server information like IP and MOTD.") // War auf Deutsch
+        @Config.Comment("Show server information like IP and MOTD.")
         @Config.LangKey("f3hud.config.modules.showServer")
         public boolean showServer = true;
 
@@ -125,6 +125,9 @@ public class ModConfig {
         @Config.LangKey("f3hud.config.position.rightY")
         @Config.Comment("Vertical margin for the right side (Default: 8)")
         public int rightY = 8;
+
+        @Config.Comment("Vertical offset for the Compass (Default: 40 to avoid overlap with TAN)")
+        public int compassYOffset = 40;
     }
 
     public static class Animation {
@@ -144,6 +147,16 @@ public class ModConfig {
         @Config.Comment("Alpha for Compass & Graph background (0-255)")
         @Config.RangeInt(min = 0, max = 255)
         public int backgroundAlpha = 100;
+
+        @Config.Comment("Show a background box behind text modules")
+        public boolean showTextBackground = true;
+
+        @Config.Comment("Transparency of the text background (0-255)")
+        @Config.RangeInt(min = 0, max = 255)
+        public int textBackgroundAlpha = 100;
+
+        @Config.Comment("Color of the text background (Hex, e.g. 0x000000 for black)")
+        public String textBackgroundColor = "0x000000";
     }
 
     @Mod.EventBusSubscriber(modid = "betterf3reborn")

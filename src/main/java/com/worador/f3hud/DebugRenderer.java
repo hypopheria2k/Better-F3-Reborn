@@ -2,6 +2,7 @@ package com.worador.f3hud;
 
 import com.worador.f3hud.layout.LayoutEngine;
 import com.worador.f3hud.render.RendererRegistry;
+import com.worador.f3hud.util.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
@@ -91,7 +92,6 @@ public class DebugRenderer {
         if (ModConfig.modules.showPerformanceGraph) {
             float eased = easeOutCubic(animProgress);
             int graphX = 5;
-            // Graph bleibt unten links
             int graphY = ModConfig.forceOpen ? sr.getScaledHeight() - 75 : sr.getScaledHeight() - 65;
             GlStateManager.pushMatrix();
             GlStateManager.translate(0, (1.0f - eased) * 70, 0);
@@ -113,11 +113,11 @@ public class DebugRenderer {
                 float easedCompass = easeOutCubic(compassProgress);
 
                 int centerX = sr.getScaledWidth() / 2;
-                // Position: Über der Hotbar (Hotbar ist ca. 22 Pixel hoch + kleiner Puffer)
-                int compassY = sr.getScaledHeight() - 45;
+
+                // Korrektur: -68 ist der ideale Abstand zum Standard-HUD
+                int compassY = sr.getScaledHeight() - 50 - ModConfig.position.compassYOffset;
 
                 GlStateManager.pushMatrix();
-                // Animation kommt jetzt von unten nach oben geslidet
                 GlStateManager.translate(0, (1.0f - easedCompass) * 30, 0);
                 RendererRegistry.getRenderer(compass).render(compass, centerX - 50, compassY, animProgress);
                 GlStateManager.popMatrix();
@@ -127,7 +127,6 @@ public class DebugRenderer {
 
     private void renderLeftSide(ScaledResolution sr) {
         GlStateManager.pushMatrix();
-
         float scale = (float) ModConfig.position.userScale;
 
         if (ModConfig.animation.enableAnimation) {
@@ -137,7 +136,6 @@ public class DebugRenderer {
         }
 
         GlStateManager.scale(scale, scale, 1.0f);
-
         int x = (int) (ModConfig.position.leftX / scale);
         int y = (int) (ModConfig.position.leftY / scale);
 
@@ -159,7 +157,6 @@ public class DebugRenderer {
 
     private void renderRightSide(ScaledResolution sr) {
         GlStateManager.pushMatrix();
-
         float scale = (float) ModConfig.position.userScale;
 
         if (ModConfig.animation.enableAnimation) {
@@ -169,10 +166,9 @@ public class DebugRenderer {
         }
 
         GlStateManager.scale(scale, scale, 1.0f);
-
         float xBase = sr.getScaledWidth() / scale;
-        float y = ModConfig.position.rightY / scale;
-        float rXOffset = ModConfig.position.rightX / scale;
+        float y = (float) (ModConfig.position.rightY / scale);
+        float rXOffset = (float) (ModConfig.position.rightX / scale);
 
         for (InfoModule module : ModuleRegistry.getRightModules()) {
             if (!module.isEnabled()) continue;
@@ -183,7 +179,6 @@ public class DebugRenderer {
             RendererRegistry.getRenderer(module).render(module, (int) x, (int) y, animProgress);
             y += (module.getLines().size() * 11);
         }
-
         GlStateManager.popMatrix();
     }
 
@@ -195,6 +190,11 @@ public class DebugRenderer {
         int currentFps = Minecraft.getDebugFPS();
         int limit = mc.gameSettings.limitFramerate;
         String limitStr = (limit >= 260) ? "Unlimited" : String.valueOf(limit);
-        mc.fontRenderer.drawStringWithShadow("FPS: " + currentFps + "/" + limitStr + " fps", x, y, ModConfig.colors.colorFPS);
+        String fullText = "FPS: " + currentFps + "/" + limitStr + " fps";
+
+        int maxWidth = mc.fontRenderer.getStringWidth(fullText);
+        RenderUtils.drawComponentBackground(x, y, maxWidth, 11, animProgress);
+
+        mc.fontRenderer.drawStringWithShadow(fullText, x, y, ModConfig.colors.colorFPS);
     }
 }

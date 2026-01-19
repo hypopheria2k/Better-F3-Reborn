@@ -4,6 +4,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
@@ -12,14 +14,12 @@ import org.lwjgl.input.Keyboard;
 public class KeybindHandler {
     private final Minecraft mc = Minecraft.getMinecraft();
 
-    // Nutzt jetzt den Key aus der .lang Datei für die Kategorieüberschrift
     private static final String CATEGORY = "key.categories.betterf3reborn";
 
     public static KeyBinding kbCoords, kbSystem, kbGraph, kbCompass, kbFPS, kbRotation;
-    public static KeyBinding kbWorld, kbEntities, kbTargeted, kbDimension, kbMagic;
+    public static KeyBinding kbWorld, kbEntities, kbTargeted, kbDimension, kbMagic, kbBackground;
 
     public KeybindHandler() {
-        // Die Namen nutzen jetzt ebenfalls Sprach-Keys
         kbCoords = new KeyBinding("key.toggle.coordinates", Keyboard.KEY_NONE, CATEGORY);
         kbSystem = new KeyBinding("key.toggle.system", Keyboard.KEY_NONE, CATEGORY);
         kbGraph = new KeyBinding("key.toggle.graph", Keyboard.KEY_NONE, CATEGORY);
@@ -31,6 +31,8 @@ public class KeybindHandler {
         kbTargeted = new KeyBinding("key.toggle.targeted", Keyboard.KEY_NONE, CATEGORY);
         kbDimension = new KeyBinding("key.toggle.dimension", Keyboard.KEY_NONE, CATEGORY);
         kbMagic = new KeyBinding("key.toggle.magic", Keyboard.KEY_NONE, CATEGORY);
+        // Neues Keybind für das Menü
+        kbBackground = new KeyBinding("key.toggle.background", Keyboard.KEY_NONE, CATEGORY);
 
         ClientRegistry.registerKeyBinding(kbCoords);
         ClientRegistry.registerKeyBinding(kbSystem);
@@ -43,6 +45,7 @@ public class KeybindHandler {
         ClientRegistry.registerKeyBinding(kbTargeted);
         ClientRegistry.registerKeyBinding(kbDimension);
         ClientRegistry.registerKeyBinding(kbMagic);
+        ClientRegistry.registerKeyBinding(kbBackground);
     }
 
     @SubscribeEvent
@@ -69,6 +72,7 @@ public class KeybindHandler {
                 case Keyboard.KEY_T: toggle("Targeted Block", !ModConfig.modules.showTargetedBlock); break;
                 case Keyboard.KEY_D: toggle("Dimension", !ModConfig.modules.showDimension); break;
                 case Keyboard.KEY_M: toggle("Magic Modules", !ModConfig.modules.showBotania); break;
+                case Keyboard.KEY_J: toggleBackground(); break;
                 case Keyboard.KEY_Q: sendHelpMessage(); break;
             }
         }
@@ -86,6 +90,16 @@ public class KeybindHandler {
         if (kbTargeted.isPressed()) toggle("Targeted Block", !ModConfig.modules.showTargetedBlock);
         if (kbDimension.isPressed()) toggle("Dimension", !ModConfig.modules.showDimension);
         if (kbMagic.isPressed()) toggle("Magic Modules", !ModConfig.modules.showBotania);
+        if (kbBackground.isPressed()) toggleBackground();
+    }
+
+    private void toggleBackground() {
+        ModConfig.animation.showTextBackground = !ModConfig.animation.showTextBackground;
+        ConfigManager.sync("betterf3reborn", Config.Type.INSTANCE);
+        if (mc.player != null) {
+            mc.player.playSound(net.minecraft.init.SoundEvents.UI_BUTTON_CLICK, 0.5f, 1.0f);
+        }
+        sendToggleMessage("Text Background", ModConfig.animation.showTextBackground);
     }
 
     private void toggle(String name, boolean newState) {
@@ -104,12 +118,14 @@ public class KeybindHandler {
             ModConfig.modules.showBloodMagic = newState;
             ModConfig.modules.showAstralSorcery = newState;
         }
+        ConfigManager.sync("betterf3reborn", Config.Type.INSTANCE);
         sendToggleMessage(name, newState);
     }
 
     private void togglePerformanceGraph() {
         ModConfig.modules.showPerformanceGraph = !ModConfig.modules.showPerformanceGraph;
         if (ModConfig.modules.showPerformanceGraph) ModConfig.forceOpen = true;
+        ConfigManager.sync("betterf3reborn", Config.Type.INSTANCE);
         sendToggleMessage("Performance Graph", ModConfig.modules.showPerformanceGraph);
     }
 
@@ -125,6 +141,6 @@ public class KeybindHandler {
     private void sendHelpMessage() {
         if (mc.player == null) return;
         mc.player.sendMessage(new TextComponentString(TextFormatting.GOLD + "Better F3 Reborn - Shortcuts (F3 + Key):"));
-        mc.player.sendMessage(new TextComponentString(TextFormatting.GRAY + "C, S, F, K, G/X, R, W, E, T, D, M"));
+        mc.player.sendMessage(new TextComponentString(TextFormatting.GRAY + "C, S, F, K, G/X, R, W, E, T, D, M, J"));
     }
 }
