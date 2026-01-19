@@ -23,4 +23,4 @@ public class F3HudMod {
         // (Erstellt die Keybinds im Menü und hört auf Tastendrücke)
         MinecraftForge.EVENT_BUS.register(new KeybindHandler());
     }
-}
+} 

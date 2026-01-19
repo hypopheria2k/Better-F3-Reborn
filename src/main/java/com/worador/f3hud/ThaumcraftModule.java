@@ -37,4 +37,4 @@ public class ThaumcraftModule extends InfoModule {
 
         return lines;
     }
-}
+} 

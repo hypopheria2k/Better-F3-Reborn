@@ -57,4 +57,4 @@ public class ModuleRegistry {
     public static List<InfoModule> getRightModules() {
         return Collections.unmodifiableList(RIGHT);
     }
-}
+} 

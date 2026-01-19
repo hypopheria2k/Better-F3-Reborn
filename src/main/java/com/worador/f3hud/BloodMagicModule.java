@@ -21,4 +21,4 @@ public class BloodMagicModule extends InfoModule {
         }
         return lines;
     }
-}
+} 

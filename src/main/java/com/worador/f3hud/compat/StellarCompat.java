@@ -33,4 +33,4 @@ public class StellarCompat {
                 "New Moon", "Waxing Crescent", "First Quarter", "Waxing Gibbous"};
         return (phase >= 0 && phase < 8) ? phases[phase] : "Unknown";
     }
-}
+} 

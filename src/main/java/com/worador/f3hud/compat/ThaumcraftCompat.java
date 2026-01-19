@@ -70,4 +70,4 @@ public class ThaumcraftCompat {
 
         return lines;
     }
-}
+} 

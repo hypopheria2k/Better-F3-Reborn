@@ -30,4 +30,4 @@ public class StellarModule extends InfoModule {
 
         return lines;
     }
-}
+} 

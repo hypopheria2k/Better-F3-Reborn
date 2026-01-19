@@ -34,4 +34,4 @@ public class TextModuleRenderer implements IModuleRenderer {
             y += 11;
         }
     }
-}
+} 

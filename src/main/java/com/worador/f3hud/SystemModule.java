@@ -148,4 +148,4 @@ public class SystemModule extends InfoModule {
     public int getHeight() {
         return 11 * 4 + 2;
     }
-}
+} 

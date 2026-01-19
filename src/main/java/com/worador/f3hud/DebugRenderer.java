@@ -197,4 +197,4 @@ public class DebugRenderer {
 
         mc.fontRenderer.drawStringWithShadow(fullText, x, y, ModConfig.colors.colorFPS);
     }
-}
+} 

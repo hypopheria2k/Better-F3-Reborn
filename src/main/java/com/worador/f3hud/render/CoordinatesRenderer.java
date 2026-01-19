@@ -76,4 +76,4 @@ public class CoordinatesRenderer implements IModuleRenderer {
 
         mc.fontRenderer.drawStringWithShadow(zS, curX, y, ModConfig.colors.colorZ);
     }
-}
+} 

@@ -43,4 +43,4 @@ public abstract class InfoModule {
         }
         return max;
     }
-}
+} 

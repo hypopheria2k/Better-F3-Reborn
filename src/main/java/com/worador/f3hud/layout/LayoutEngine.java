@@ -10,4 +10,4 @@ public class LayoutEngine {
         leftScale = 1.0f;
         rightScale = 1.0f;
     }
-}
+} 

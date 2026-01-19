@@ -84,4 +84,4 @@ public class WorldModule extends InfoModule {
         String[] directions = {"South (+Z)", "West (-X)", "North (-Z)", "East (+X)"};
         return directions[i];
     }
-}
+} 

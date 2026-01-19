@@ -80,4 +80,4 @@ The mod generates a detailed config file at `config/betterf3reborn.cfg`.
 
 Made with ❤️ for the Minecraft 1.12.2 community.
 
-<img width="640" height="480" alt="Better F3 Reborn Gameplay" src="https://github.com/user-attachments/assets/cac7f361-6777-4552-9f40-6b1858f902f2" />
+<img width="640" height="480" alt="Better F3 Reborn Gameplay" src="https://github.com/user-attachments/assets/cac7f361-6777-4552-9f40-6b1858f902f2" /> 

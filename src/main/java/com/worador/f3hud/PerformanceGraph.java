@@ -114,4 +114,4 @@ public class PerformanceGraph {
             return ((int)(255 - 170 * f) << 16) | (255 << 8) | 85;
         }
     }
-}
+} 

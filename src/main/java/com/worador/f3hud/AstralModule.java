@@ -27,4 +27,4 @@ public class AstralModule extends InfoModule {
 
         return lines;
     }
-}
+} 

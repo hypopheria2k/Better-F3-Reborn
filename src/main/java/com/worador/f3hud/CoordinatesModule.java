@@ -60,4 +60,4 @@ public class CoordinatesModule extends InfoModule {
         // X, Y, Z, Block, Chunk = 5 Zeilen
         return 11 * 5 + 2;
     }
-}
+} 

@@ -14,4 +14,4 @@ public class GraphRenderer implements IModuleRenderer {
         graph.update();
         graph.renderAt(x, y, 100, 50, animProgress);
     }
-}
+} 

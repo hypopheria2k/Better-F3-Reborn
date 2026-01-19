@@ -54,4 +54,4 @@ public class CompassRenderer implements IModuleRenderer {
         // Rote Nadel in der Mitte
         Gui.drawRect(x + (width / 2), y - 2, x + (width / 2) + 1, y + height + 2, 0xFFFF4444);
     }
-}
+} 

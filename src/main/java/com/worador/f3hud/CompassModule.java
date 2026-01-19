@@ -26,4 +26,4 @@ public class CompassModule extends InfoModule {
         return true;
     }
 
-}
+} 

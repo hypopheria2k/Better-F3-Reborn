@@ -55,4 +55,4 @@ public class RotationModule extends InfoModule {
     public int getHeight() {
         return 11 * 2 + 2; // 2 Zeilen
     }
-}
+} 

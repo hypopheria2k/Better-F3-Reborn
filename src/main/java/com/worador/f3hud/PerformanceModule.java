@@ -33,4 +33,4 @@ public class PerformanceModule extends InfoModule {
         // Entspricht der festen Breite des Graphen
         return 200;
     }
-}
+} 

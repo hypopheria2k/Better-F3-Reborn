@@ -20,4 +20,4 @@ public class RenderUtils {
 
         Gui.drawRect(x - 2, y - 1, x + width + 2, y + height - 1, finalColor);
     }
-}
+} 

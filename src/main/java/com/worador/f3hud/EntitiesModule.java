@@ -47,4 +47,4 @@ public class EntitiesModule extends InfoModule {
 
         return lines;
     }
-}
+} 
