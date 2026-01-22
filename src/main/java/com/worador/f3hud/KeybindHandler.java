@@ -17,7 +17,7 @@ public class KeybindHandler {
     private static final String CATEGORY = "key.categories.betterf3reborn";
 
     public static KeyBinding kbCoords, kbSystem, kbGraph, kbCompass, kbFPS, kbRotation;
-    public static KeyBinding kbWorld, kbEntities, kbTargeted, kbDimension, kbMagic, kbBackground;
+    public static KeyBinding kbWorld, kbEntities, kbTargeted, kbDimension, kbMagic, kbBackground, kbBeacon;
 
     public KeybindHandler() {
         kbCoords = new KeyBinding("key.toggle.coordinates", Keyboard.KEY_NONE, CATEGORY);
@@ -31,8 +31,9 @@ public class KeybindHandler {
         kbTargeted = new KeyBinding("key.toggle.targeted", Keyboard.KEY_NONE, CATEGORY);
         kbDimension = new KeyBinding("key.toggle.dimension", Keyboard.KEY_NONE, CATEGORY);
         kbMagic = new KeyBinding("key.toggle.magic", Keyboard.KEY_NONE, CATEGORY);
-        // Neues Keybind für das Menü
         kbBackground = new KeyBinding("key.toggle.background", Keyboard.KEY_NONE, CATEGORY);
+        // Neues Keybind für Beacon
+        kbBeacon = new KeyBinding("key.toggle.beacon", Keyboard.KEY_MINUS, CATEGORY);
 
         ClientRegistry.registerKeyBinding(kbCoords);
         ClientRegistry.registerKeyBinding(kbSystem);
@@ -46,6 +47,7 @@ public class KeybindHandler {
         ClientRegistry.registerKeyBinding(kbDimension);
         ClientRegistry.registerKeyBinding(kbMagic);
         ClientRegistry.registerKeyBinding(kbBackground);
+        ClientRegistry.registerKeyBinding(kbBeacon);
     }
 
     @SubscribeEvent
@@ -73,6 +75,7 @@ public class KeybindHandler {
                 case Keyboard.KEY_D: toggle("Dimension", !ModConfig.modules.showDimension); break;
                 case Keyboard.KEY_M: toggle("Magic Modules", !ModConfig.modules.showBotania); break;
                 case Keyboard.KEY_J: toggleBackground(); break;
+                case Keyboard.KEY_MINUS: toggle("Beacon Range", !ModConfig.modules.showBeaconRange); break;
                 case Keyboard.KEY_Q: sendHelpMessage(); break;
             }
         }
@@ -91,6 +94,7 @@ public class KeybindHandler {
         if (kbDimension.isPressed()) toggle("Dimension", !ModConfig.modules.showDimension);
         if (kbMagic.isPressed()) toggle("Magic Modules", !ModConfig.modules.showBotania);
         if (kbBackground.isPressed()) toggleBackground();
+        if (kbBeacon.isPressed()) toggle("Beacon Range", !ModConfig.modules.showBeaconRange);
     }
 
     private void toggleBackground() {
@@ -112,6 +116,7 @@ public class KeybindHandler {
         else if (name.equals("Entities")) ModConfig.modules.showEntities = newState;
         else if (name.equals("Targeted Block")) ModConfig.modules.showTargetedBlock = newState;
         else if (name.equals("Dimension")) ModConfig.modules.showDimension = newState;
+        else if (name.equals("Beacon Range")) ModConfig.modules.showBeaconRange = newState;
         else if (name.equals("Magic Modules")) {
             ModConfig.modules.showBotania = newState;
             ModConfig.modules.showThaumcraft = newState;
@@ -141,6 +146,6 @@ public class KeybindHandler {
     private void sendHelpMessage() {
         if (mc.player == null) return;
         mc.player.sendMessage(new TextComponentString(TextFormatting.GOLD + "Better F3 Reborn - Shortcuts (F3 + Key):"));
-        mc.player.sendMessage(new TextComponentString(TextFormatting.GRAY + "C, S, F, K, G/X, R, W, E, T, D, M, J"));
+        mc.player.sendMessage(new TextComponentString(TextFormatting.GRAY + "C, S, F, K, G/X, R, W, E, T, D, M, J, -"));
     }
-} 
+}

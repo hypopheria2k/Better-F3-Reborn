@@ -12,7 +12,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = "1.12.2-V2.1.1"
+version = "1.12.2-V2.2.0-BETA1"
 group = "com.worador.f3hud" 
 archivesBaseName = "BetterF3Reborn" 
 
@@ -40,7 +40,7 @@ dependencies {
     // StellarCore lokal einbinden (wichtig: Dateiname exakt wie im libs-Ordner)
     compileOnly files('libs/StellarCore-1.5.22.jar')
     compileOnly files('libs/astralsorcery-1.12.2-1.10.27.jar')
-    compileOnly files('libs/Botania_r1.10-364.4.jar')
+    compileOnly files('libs/Botania_r1.10-369b.jar')
     compileOnly files('libs/BloodMagic-1.12.2-2.4.3-105.jar')
     compileOnly files('libs/Thaumcraft-1.12.2-6.1.BETA26.jar')
 }

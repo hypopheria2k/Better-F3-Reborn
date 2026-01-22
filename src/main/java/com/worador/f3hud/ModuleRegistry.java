@@ -16,14 +16,18 @@ public class ModuleRegistry {
 
         // LINKER BEREICH
         LEFT.add(new CoordinatesModule());
+        LEFT.add(new ChunkPosModule());
         LEFT.add(new RotationModule());
         LEFT.add(new WorldModule());
         LEFT.add(new DimensionModule());
         LEFT.add(new RegionModule());
         LEFT.add(new TargetedBlockModule());
+        LEFT.add(new EntityStatsModule());
         LEFT.add(new EntitiesModule());
         LEFT.add(new PerformanceModule());
         LEFT.add(new CompassModule());
+        LEFT.add(new SlimeChunkModule());
+        LEFT.add(new EndModule());
 
         // RECHTER BEREICH
         RIGHT.add(new SystemModule());
@@ -33,6 +37,20 @@ public class ModuleRegistry {
         if (Loader.isModLoaded("botania"))      RIGHT.add(new BotaniaModule());
         if (Loader.isModLoaded("bloodmagic"))   RIGHT.add(new BloodMagicModule());
         if (Loader.isModLoaded("thaumcraft"))   RIGHT.add(new ThaumcraftModule());
+
+        RIGHT.add(new OxygenModule());
+        RIGHT.add(new DurabilityModule());
+        RIGHT.add(new PotionModule());
+        RIGHT.add(new BeaconModule());
+        RIGHT.add(new WeatherModule());
+        RIGHT.add(new GrowthModule());
+        RIGHT.add(new SpeedometerModule());
+        RIGHT.add(new VillagerTradeModule());
+        RIGHT.add(new ItemDespawnModule());
+        RIGHT.add(new HealthAndHungerModule());
+        RIGHT.add(new MobAggroModule());
+        RIGHT.add(new MachineProgressModule());
+        RIGHT.add(new VersionModule());
     }
 
     public static InfoModule getCompassModule() {
@@ -57,4 +75,4 @@ public class ModuleRegistry {
     public static List<InfoModule> getRightModules() {
         return Collections.unmodifiableList(RIGHT);
     }
-} 
+}

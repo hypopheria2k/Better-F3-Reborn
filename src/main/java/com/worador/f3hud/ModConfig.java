@@ -57,6 +57,9 @@ public class ModConfig {
         @Config.LangKey("f3hud.config.modules.showTargetedBlock")
         public boolean showTargetedBlock = true;
 
+        @Config.LangKey("f3hud.config.modules.showEntityStats")
+        public boolean showEntityStats = true;
+
         @Config.LangKey("f3hud.config.modules.showEntities")
         public boolean showEntities = true;
 
@@ -75,12 +78,34 @@ public class ModConfig {
         @Config.LangKey("f3hud.config.modules.showCompass")
         public boolean showCompass = true;
 
+        @Config.Comment("Show distance to nearest active beacon")
+        public boolean showBeaconRange = true;
+
+        // Sauerstoff Anzeige - Keine Config wird immer angezeigt + anderer kleiner Modulscheiß xD
+        public boolean showOxygen = true;
+        public boolean showDurability = true;
+        public boolean showPotions = true;
+        public boolean showWeather = true;
+        public boolean showSlimeDistance = true;
+        public boolean showGrowth = true;
+        public boolean showSpeedometer = true;
+        public boolean showVillagerStatus = true;
+        public boolean showChunkPos = true;
+        public boolean showMachineProgress = true;
+        public boolean showAggroModule = true;
+        public boolean showExplosionTimer = true;
+        public boolean showItemDespawn = true;
+        public boolean showHealthStats = true;
+        public boolean showEndModule = true;
+        public boolean showVersion = true;
+
         // Mod-Support
         public boolean showAstralSorcery = true;
         public boolean showStellar = true;
         public boolean showBotania = true;
         public boolean showBloodMagic = true;
         public boolean showThaumcraft = true;
+
     }
 
     public static class Colors {
@@ -168,4 +193,4 @@ public class ModConfig {
             }
         }
     }
-} 
+}

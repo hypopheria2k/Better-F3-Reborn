@@ -1,9 +1,9 @@
 package com.worador.f3hud;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.util.math.MathHelper;
+import java.util.Locale;
 
 public class RegionModule extends InfoModule {
 
@@ -22,22 +22,35 @@ public class RegionModule extends InfoModule {
         List<InfoLine> lines = new ArrayList<>();
         if (mc.player == null) return lines;
 
-        // Mathematisch korrekte Region-Berechnung für r.x.z.mca
-        int regX = MathHelper.floor(mc.player.posX / 512.0D);
-        int regZ = MathHelper.floor(mc.player.posZ / 512.0D);
+        // 1. Region-File Berechnung
+        int regX = MathHelper.floor(mc.player.posX) >> 9; // 512 Blöcke = 1 Region
+        int regZ = MathHelper.floor(mc.player.posZ) >> 9;
 
-        // Lokale Chunk-ID (0-31)
-        int chunkX = MathHelper.floor(mc.player.posX / 16.0D) & 31;
-        int chunkZ = MathHelper.floor(mc.player.posZ / 16.0D) & 31;
-        int sectionY = MathHelper.floor(mc.player.posY / 16.0D);
+        // 2. Lokale Chunk-Position (0-31)
+        int chunkX = (MathHelper.floor(mc.player.posX) >> 4) & 31;
+        int chunkZ = (MathHelper.floor(mc.player.posZ) >> 4) & 31;
 
-        // Nutze %d für Integers, um das ".0" zu vermeiden
-        String regionFile = String.format(java.util.Locale.US, "r.%d.%d.mca", regX, regZ);
-        String localPos = String.format(java.util.Locale.US, "Chunk [%d, %d] in Section %d", chunkX, chunkZ, sectionY);
+        // 3. Lokale Block-Position innerhalb der Region (0-511)
+        int localBlockX = MathHelper.floor(mc.player.posX) & 511;
+        int localBlockZ = MathHelper.floor(mc.player.posZ) & 511;
 
-        lines.add(new InfoLine("Region: ", regionFile, ModConfig.colors.colorDefault));
-        lines.add(new InfoLine("Local: ", localPos, 0xAAAAAA));
+        // Anzeige: Dateiname (Deutsches Verhalten: Klar und präzise)
+        String regionFile = String.format(Locale.US, "r.%d.%d.mca", regX, regZ);
+        lines.add(new InfoLine("File: ", regionFile, 0x55FF55));
+
+        // Anzeige: Chunk-Slot (Wichtig für NBT-Editoren)
+        String chunkSlot = String.format(Locale.US, "Slot [%d, %d]", chunkX, chunkZ);
+        lines.add(new InfoLine("Local: ", chunkSlot, 0xAAAAAA));
+
+        // ZUSATZ: Rand-Warnung (World-Pruning Hilfe)
+        // Wenn man weniger als 32 Blöcke vom Rand der Region weg ist
+        if (localBlockX < 32 || localBlockX > 480 || localBlockZ < 32 || localBlockZ > 480) {
+            lines.add(new InfoLine("Edge: ", "Near Region Border", 0xFFAA00));
+        } else {
+            // Relative Position in Blöcken anzeigen (für technische Analysen)
+            lines.add(new InfoLine("Rel: ", localBlockX + " / " + localBlockZ, 0x777777));
+        }
 
         return lines;
     }
-} 
+}

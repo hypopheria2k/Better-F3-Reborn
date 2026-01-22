@@ -32,7 +32,6 @@ public class WorldModule extends InfoModule {
 
         BlockPos pos = new BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ);
 
-        // 1. TPS (Nur im Singleplayer verfügbar)
         if (mc.isSingleplayer() && mc.getIntegratedServer() != null) {
             long[] times = mc.getIntegratedServer().tickTimeArray;
             long sum = 0;
@@ -44,29 +43,8 @@ public class WorldModule extends InfoModule {
             lines.add(new InfoLine("Server: ", Math.round(tps*10)/10.0 + " TPS (" + Math.round(tickTime*100)/100.0 + "ms)", tpsColor));
         }
 
-        // 2. LIGHT
-        Chunk chunk = mc.world.getChunkFromBlockCoords(pos);
-        if (chunk != null && !chunk.isEmpty()) {
-            int sky = chunk.getLightFor(EnumSkyBlock.SKY, pos);
-            int block = chunk.getLightFor(EnumSkyBlock.BLOCK, pos);
-            int total = Math.max(sky, block);
-            lines.add(new InfoLine("Light: ", total + " (Sky: " + sky + ", Block: " + block + ")", ModConfig.colors.colorLight));
-
-            // 3. SLIME CHUNK
-            if (chunk.x != lastChunkX || chunk.z != lastChunkZ) {
-                lastIsSlime = checkSlimeChunk(chunk.x, chunk.z);
-                lastChunkX = chunk.x;
-                lastChunkZ = chunk.z;
-            }
-            if (lastIsSlime) {
-                lines.add(new InfoLine("Slime Chunk: ", "Yes", 0x55FF55));
-            }
-        }
-
-        // 4. BIOME
         lines.add(new InfoLine("Biome: ", mc.world.getBiome(pos).getBiomeName(), ModConfig.colors.colorBiome));
 
-        // 5. DIFFICULTY & TIME
         float diff = mc.world.getDifficultyForLocation(pos).getAdditionalDifficulty();
         long days = mc.world.getWorldTime() / 24000L;
         lines.add(new InfoLine("Local Difficulty: ", Math.round(diff*100)/100.0 + " (Day " + days + ")", 0xFFFFFF));
