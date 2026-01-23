@@ -24,13 +24,13 @@ public class VersionModule extends InfoModule {
         // 1. Build-Zeile: [Version] 2.2.0 | Beta1
         // Label in Grau, Nummer in Grün (0x55FF55), Status in Cyan (0x55FFFF)
         String versionLabel = TextFormatting.GRAY + "[" + TextFormatting.WHITE + "v" + TextFormatting.GRAY + "] ";
-        String versionValue = TextFormatting.GREEN + "2.2.0 " + TextFormatting.GRAY + "| " + TextFormatting.AQUA + "Beta1";
+        String versionValue = TextFormatting.GREEN + "2.2.0 " + TextFormatting.GRAY + "| " + TextFormatting.AQUA + "Beta2";
         lines.add(new InfoLine(versionLabel, versionValue, 0x55FF55));
 
         // 2. Warn-Zeile: [!] Notice: May contain bugs
         // Icon in Rot (0xFF5555), Text in hellem Rot/Rosa
         String warningLabel = TextFormatting.RED + "[!] " + TextFormatting.WHITE + "Notice: ";
-        String warningText = TextFormatting.RED + "BETA " + TextFormatting.GRAY + "- " + "May contain bugs";
+        String warningText = TextFormatting.RED + "BETA " + TextFormatting.GRAY + "- " + "May contain (heavy)bugs";
         lines.add(new InfoLine(warningLabel, warningText, 0xFF5555));
 
         return lines;

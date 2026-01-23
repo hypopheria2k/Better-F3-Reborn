@@ -5,79 +5,78 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Java CI with Gradle](https://github.com/hypopheria2k/better-f3-reborn/actions/workflows/gradle-publish.yml/badge.svg)](https://github.com/hypopheria2k/better-f3-reborn/actions)
 
-**⚠️ Note:** The old codebase has been moved to the `main_legacy` branch. This branch contains the latest rewritten and optimized code (v2.1.0+).
+**Better F3 Reborn** is a comprehensive overhaul of the Minecraft debug HUD for version 1.12.2. It combines the modern, highly customizable design of "Better F3" with extreme performance optimizations specifically tailored for the 1.12.2 modding era.
 
-A modern, feature-rich debug HUD overhaul for Minecraft 1.12.2 – bringing Better F3's clean design to the golden age of modding.
+> **New in v2.3.0 ("Silent Fan Update"):** Massive CPU load reduction of up to 90% via intelligent Tick-Caching. Specifically optimized for integrated GPUs (AMD Ryzen Vega 7 / Intel Xe).
 
-<img width="640" height="480" alt="2026-01-18_19 31 05" src="https://github.com/user-attachments/assets/f27791bc-6ebb-4eb5-a50b-dfc4ebb93ba4" />
+---
 
 ## 💬 Community & Support
 
-Need help? Have a suggestion for a new module? Join our official Discord server!
+Have questions? Want to suggest a feature? Join our community!
 
 **[![Join our Discord](https://img.shields.io/badge/Discord-Join%20our%20Server-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/gVHefyjsRg)**
 
-## ✨ New in Version 2.1.1
+---
 
-- **Dynamic Text Backgrounds:** Added **F3 + J** to toggle the dark background boxes behind text modules on the fly.
-- **Individual Compass Positioning:** The vertical position of the compass can now be fine-tuned via `compassYOffset` in the config to avoid overlapping with other HUD mods (e.g., Tough As Nails).
-- **Advanced Color Customization:** Text background colors can now be fully customized using Hex-Strings (e.g., `0x000000` for black).
-- **Hardened System Info:** Improved GPU string cleaning for Linux/Mesa users (Ryzen APUs) to ensure a clean, clutter-free HUD.
-- **Global Scaling:** Use the `userScale` option (0.1 to 2.0) to perfectly match your screen resolution.
-- **Improved Spacing:** Optimized default offsets to provide better readability.
+## ✨ Key Features
 
-## 🏗️ Architectural Overhaul: From Monolith to Framework
-The codebase has been radically refactored to prioritize maintainability and extensibility:
-- **Decoupled Rendering:** Every HUD component is now an independent class, making the system more stable and easier to update.
-- **Registry-Based System:** New modules can be easily registered within the `ModuleRegistry`, allowing for clean integration of third-party mod data.
-- **Centralized Utilities:** Design elements like backgrounds and colors are now handled by a central `RenderUtils` class for a consistent look.
+### 🖥️ Ingame GUI Configurator
+No more manual editing of config files! Press **CTRL + C** to open the visual editor:
+* **Live Preview:** Toggle modules ON/OFF with a single click.
+* **Dual-Column Layout:** Freely move modules between the left and right sides of your screen.
+* **X-Offset Sliders:** Fine-tune the positioning of each side to match your UI scale perfectly.
 
-## 🛠️ Features
+### ⚡ Performance Engine (v2.3.0)
+Engineered for low-end systems, APUs, and heavy modpacks:
+* **Smart-Tick-Caching:** Expensive calculations (Weather, Biomes, System Data) are updated once per second (20 ticks) instead of 60+ times per second.
+* **Strict Gating:** Disabled modules consume **zero** CPU cycles (Zero Overhead).
+* **Responsive Updates:** Movement data (Speedometer/Compass) remains fluid using adaptive high-frequency update rates.
 
-### 🔌 Advanced Mod Compatibility
+### 🐎 Entity & Mob Analysis
+* **Horse Breeding Tool:** Displays exact speed (m/s) and jump height (blocks) for your mount.
+* **Targeted Health:** Instantly see the exact HP, name, and type of the entity you are looking at.
+* **Mob Aggro Radar:** Real-time warnings for hostile mobs targeting you, including "Explosion Alerts" for igniting Creepers.
+
+### 🔌 Out-of-the-Box Mod Compatibility
 Deep integration for popular 1.12.2 magic and tech mods:
-- **Thaumcraft / Botania / Blood Magic / Astral Sorcery:** Real-time tracking of Mana, Vis, LP, and Starlight.
-- **Performance Engine:** Real-time **TPS** and **MSPT** tracking with dynamic color-coding.
+* **Magic:** Thaumcraft (Vis/Flux), Botania (Mana), Blood Magic (LP), Astral Sorcery (Starlight), and Stellar API.
+* **Performance:** Real-time **TPS** and **MSPT** tracking for server monitoring.
+* **Environment:** Detailed weather forecasts (timers for rain/thunder) and a Slime Chunk detector.
 
-### 🎨 Clean Two-Column Layout
-- **Left Side:** Game information (coordinates, world data, entities).
-- **Right Side:** System information (Java, CPU, GPU, memory).
-- Smooth slide-in animations for a modern feel.
+---
 
-## ⌨️ Keybinds & Customization
+## ⌨️ Controls & Keybinds
 
-All F3-shortcuts are now **fully rebindable** in the standard Minecraft **Controls** menu!
+| Shortcut | Function |
+| :--- | :--- |
+| **CTRL + C** | **Open Visual HUD Editor (GUI)** |
+| **F3 + X** | Toggle Performance Graph (Lock HUD) |
+| **F3 + K** | Toggle Graphical Compass |
+| **F3 + C** | Toggle Coordinates & Nether Link |
+| **F3 + J** | Toggle Text Background Boxes |
+| **F3 + S** | Toggle System Info (CPU/GPU) |
 
-| Shortcut   | Function |
-|:-----------| :--- |
-| **F3 + X** | Toggle Performance Graph (Locks HUD open) |
-| **F3 + J** | **Toggle Text Background Boxes** (New!) |
-| **F3 + K** | Toggle Compass |
-| **F3 + C** | Toggle Coordinates |
-| **F3 + S** | Toggle System Info |
-| **F3 + F** | Toggle FPS Display |
-| **F3 + R** | Toggle Rotation |
-| **F3 + W** | Toggle World Info |
-| **F3 + E** | Toggle Entities |
-| **F3 + T** | Toggle Targeted Block |
-| **F3 + D** | Toggle Dimension |
-| **F3 + M** | Toggle Magic/Mod Modules |
-| **F3 + Q** | Show Help List in Chat |
+---
 
-## ⚙️ Configuration
-The mod generates a detailed config file at `config/betterf3reborn.cfg`.
-- **Colors:** Full RGB Hex format support.
-- **Layout:** Adjust `userScale`, `compassYOffset`, and `backgroundAlpha`.
-- **Visibility:** Toggle every single line of information.
+## 🏗️ Technical Architecture
+
+The project has been radically refactored for modern standards:
+- **Registry System:** Modules are decoupled and independent. Adding new data sources is seamless.
+- **RenderUtils:** A centralized rendering pipeline ensures a consistent look and full Hex-Color support.
+- **ScaledResolution:** The GUI editor automatically detects your Minecraft GUI scale to remain perfectly usable on any resolution.
+
+---
 
 ## 📥 Installation
+
 1. Download the mod from [CurseForge](https://www.curseforge.com/minecraft/mc-mods/better-f3-reborn) or [Modrinth](https://modrinth.com/mod/better-f3-reborn).
-2. Install [Minecraft Forge 1.12.2](https://files.minecraftforge.net/net/minecraftforge/forge/index_1.12.2.html).
-3. Place the `.jar` file in your `mods` folder.
-4. **Recommendation:** Delete your old `betterf3reborn.cfg` to apply the new 2.1.1 default values.
+2. Requires **Minecraft Forge 1.12.2** (Recommended: 14.23.5.2859).
+3. Place the `.jar` file into your `mods` folder.
+4. **Important:** When upgrading to v2.3.0, delete your old `betterf3reborn.cfg` to enable all new caching and temperature features.
 
-📜 License: MIT - Feel free to use it in any modpack!
+---
 
-Made with ❤️ for the Minecraft 1.12.2 community.
+📜 **License:** MIT - Feel free to use this in any modpack!
 
-<img width="640" height="480" alt="Better F3 Reborn Gameplay" src="https://github.com/user-attachments/assets/cac7f361-6777-4552-9f40-6b1858f902f2" /> 
+*Made with ❤️ for the 1.12.2 Modding Community.*

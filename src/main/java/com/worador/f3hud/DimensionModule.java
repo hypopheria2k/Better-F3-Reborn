@@ -7,6 +7,10 @@ import java.util.List;
 
 public class DimensionModule extends InfoModule {
 
+    private static final int UPDATE_INTERVAL_TICKS = 20;
+    private int lastUpdateTick = -1;
+    private List<InfoLine> cachedLines = new ArrayList<>();
+
     @Override
     public String getName() {
         return "Dimension";
@@ -19,54 +23,47 @@ public class DimensionModule extends InfoModule {
 
     @Override
     public List<InfoLine> getLines() {
-        List<InfoLine> lines = new ArrayList<>();
-        if (mc.player == null || mc.world == null) return lines;
-
-        int dimension = mc.world.provider.getDimension();
-        String dimDisplay;
-        int color;
-
-        // 1. Dimension-Analyse und Farbgebung
-        switch (dimension) {
-            case -1:
-                dimDisplay = "The Nether";
-                color = 0xFF5555; // Rot
-                break;
-            case 0:
-                dimDisplay = "Overworld";
-                color = 0x55FF55; // Grün
-                break;
-            case 1:
-                dimDisplay = "The End";
-                color = 0xFF55FF; // Magenta
-                break;
-            default:
-                dimDisplay = "Dim: " + dimension;
-                color = ModConfig.colors.colorDimension;
-                break;
+        if (!isEnabledInConfig() || mc.player == null || mc.world == null) {
+            return new ArrayList<>();
         }
 
-        lines.add(new InfoLine("World: ", dimDisplay, color));
+        int currentTick = mc.player.ticksExisted;
 
-        // 2. Biom-Anzeige (Wichtig für Spawning-Regeln)
-        BlockPos pos = mc.player.getPosition();
-        Biome biome = mc.world.getBiome(pos);
-        lines.add(new InfoLine("Biome: ", biome.getBiomeName(), 0xAAAAAA));
+        if (cachedLines.isEmpty() || (currentTick - lastUpdateTick) >= UPDATE_INTERVAL_TICKS) {
+            cachedLines = new ArrayList<>();
 
-        // 3. Koordinaten-Link (Das technische Highlight)
-        // Hilft beim Finden von Portalen
-        if (dimension == 0) {
-            // Zeige, wo man im Nether wäre
-            int netherX = pos.getX() / 8;
-            int netherZ = pos.getZ() / 8;
-            lines.add(new InfoLine("Nether-Link: ", String.format("X: %d, Z: %d", netherX, netherZ), 0xFFAA00));
-        } else if (dimension == -1) {
-            // Zeige, wo man in der Overworld wäre
-            int overX = pos.getX() * 8;
-            int overZ = pos.getZ() * 8;
-            lines.add(new InfoLine("Overworld-Link: ", String.format("X: %d, Z: %d", overX, overZ), 0x55FFFF));
-        }
+            int dimension = mc.world.provider.getDimension();
+            String dimDisplay;
+            int color;
 
-        return lines;
+            switch (dimension) {
+                case -1:
+                    dimDisplay = "The Nether";
+                    color = 0xFF5555;
+                    break;
+                case 0:
+                    dimDisplay = "Overworld";
+                    color = 0x55FF55;
+                    break;
+                case 1:
+                    dimDisplay = "The End";
+                    color = 0xFF55FF;
+                    break;
+                default:
+                    dimDisplay = "Dim: " + dimension;
+                    color = ModConfig.colors.colorDimension;
+                    break;
+            }
+
+            cachedLines.add(new InfoLine("World: ", dimDisplay, color));
+
+            BlockPos pos = mc.player.getPosition();
+            Biome biome = mc.world.getBiome(pos);
+            cachedLines.add(new InfoLine("Biome: ", biome.getBiomeName(), 0xAAAAAA));
+
+            lastUpdateTick = currentTick; // Wichtig: Timer zurücksetzen!
+        } // Ende des If-Blocks
+
+        return cachedLines;
     }
 }

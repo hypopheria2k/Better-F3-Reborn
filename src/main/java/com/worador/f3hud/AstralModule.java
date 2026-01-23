@@ -6,25 +6,42 @@ import java.util.List;
 
 public class AstralModule extends InfoModule {
 
+    // Performance Throttling: Update once per second (20 ticks) using tick-based caching
+    private static final int UPDATE_INTERVAL_TICKS = 20;
+    private int lastUpdateTick = -1;
+    private List<InfoLine> cachedLines = new ArrayList<>();
+
     @Override
     public String getName() { return "Astral Sorcery"; }
 
     @Override
     protected boolean isEnabledInConfig() {
-        // Hier greifen wir auf die Config zu -> Variable wird "aktiv" (nicht mehr grau)
+        // Strict Gating: Check config first, before any expensive operations
         return ModConfig.modules.showAstralSorcery;
     }
 
     @Override
     public List<InfoLine> getLines() {
-        List<InfoLine> lines = new ArrayList<>();
-
-        // Der Sicherheits-Check verhindert, dass die Compat-Klasse geladen wird, wenn die Mod fehlt
-        if (Loader.isModLoaded("astralsorcery") && mc.world != null) {
-            // Aufruf über vollqualifizierten Namen
-            lines.addAll(com.worador.f3hud.compat.AstralCompat.getAstralLines(mc.world));
+        // Strict Gating: Early exit if disabled
+        if (!isEnabledInConfig() || mc.player == null || mc.world == null) {
+            return new ArrayList<>();
         }
 
-        return lines;
+        int currentTick = mc.player.ticksExisted;
+        
+        // Only update if enough ticks have passed or if it's the first call
+        if (cachedLines.isEmpty() || (currentTick - lastUpdateTick) >= UPDATE_INTERVAL_TICKS) {
+            cachedLines = new ArrayList<>();
+            
+            // Expensive operations inside the refresh block
+            if (Loader.isModLoaded("astralsorcery")) {
+                // Aufruf über vollqualifizierten Namen
+                cachedLines.addAll(com.worador.f3hud.compat.AstralCompat.getAstralLines(mc.world));
+            }
+            
+            lastUpdateTick = currentTick;
+        }
+        
+        return cachedLines;
     }
-} 
+}

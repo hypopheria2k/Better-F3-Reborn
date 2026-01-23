@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DurabilityModule extends InfoModule {
+    private static final int UPDATE_INTERVAL_TICKS = 5;
+    private int lastUpdateTick = -1;
+    private List<InfoLine> cachedLines = new ArrayList<>();
+
     @Override
     public String getName() { return "Durability"; }
 
@@ -15,26 +19,29 @@ public class DurabilityModule extends InfoModule {
 
     @Override
     public List<InfoLine> getLines() {
-        List<InfoLine> lines = new ArrayList<>();
-        if (mc.player == null) return lines;
+        if (!isEnabledInConfig() || mc.player == null) return new ArrayList<>();
 
-        // 1. Ausrüstung in den Händen (Main & Offhand)
-        addDurabilityLine(lines, mc.player.getHeldItemMainhand(), "Main: ");
-        addDurabilityLine(lines, mc.player.getHeldItemOffhand(), "Off: ");
+        int currentTick = mc.player.ticksExisted;
+        if (cachedLines.isEmpty() || (currentTick - lastUpdateTick) >= UPDATE_INTERVAL_TICKS) {
+            cachedLines = new ArrayList<>();
 
-        // 2. Rüstung (Helm bis Schuhe)
-        NonNullList<ItemStack> armor = mc.player.inventory.armorInventory;
-        String[] armorNames = {"Boots", "Legs", "Chest", "Helm"};
+            // 1. Hands (Main & Off)
+            addDurabilityLine(cachedLines, mc.player.getHeldItemMainhand(), "Main: ");
+            addDurabilityLine(cachedLines, mc.player.getHeldItemOffhand(), "Off: ");
 
-        for (int i = 3; i >= 0; i--) {
-            ItemStack stack = armor.get(i);
-            if (!stack.isEmpty()) {
-                // Wir nutzen hier kurze Bezeichnungen für mehr Platz im HUD
-                addDurabilityLine(lines, stack, armorNames[i] + ": ");
+            // 2. Armor (Iteriere sicher durch alle 4 Slots)
+            NonNullList<ItemStack> armor = mc.player.inventory.armorInventory;
+            String[] armorNames = {"Boots", "Legs", "Chest", "Helm"};
+
+            for (int i = 3; i >= 0; i--) {
+                ItemStack stack = armor.get(i);
+                if (!stack.isEmpty()) {
+                    addDurabilityLine(cachedLines, stack, armorNames[i] + ": ");
+                }
             }
+            lastUpdateTick = currentTick;
         }
-
-        return lines;
+        return cachedLines;
     }
 
     private void addDurabilityLine(List<InfoLine> lines, ItemStack stack, String prefix) {
@@ -43,26 +50,22 @@ public class DurabilityModule extends InfoModule {
             int currentDur = maxDur - stack.getItemDamage();
             double percent = (currentDur * 100.0) / maxDur;
 
-            // Deutsches Verhalten: Nur anzeigen, wenn relevant (z.B. < 90% Haltbarkeit)
-            // Das hält dein HUD sauber auf deinem Manjaro-System.
-            if (percent > 90.0 && !prefix.startsWith("Main")) return;
+            // FIX: Wir zeigen IMMER alles an, wenn das Modul an ist.
+            // Das "Ausblenden bei > 90%" war der Grund für den verschwundenen Helm.
 
-            // Farblogik & Warn-Style
             int color = 0x55FF55; // GRÜN
             String style = "";
 
             if (percent <= 15.0) {
                 color = 0xFF5555; // ROT
-                style = TextFormatting.BOLD.toString() + TextFormatting.UNDERLINE.toString();
+                style = TextFormatting.BOLD.toString();
             } else if (percent <= 40.0) {
                 color = 0xFFAA00; // GOLD
-            } else if (percent <= 70.0) {
+            } else if (percent <= 75.0) {
                 color = 0xFFFF55; // GELB
             }
 
-            // Visueller Balken zur schnellen Erfassung
             String bar = getDurabilityBar(percent);
-
             String info = String.format("%s %d/%d (%.0f%%)", bar, currentDur, maxDur, percent);
             lines.add(new InfoLine(style + prefix, info, color));
         }

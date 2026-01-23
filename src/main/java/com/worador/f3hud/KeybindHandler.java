@@ -1,6 +1,7 @@
 package com.worador.f3hud;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
@@ -17,7 +18,7 @@ public class KeybindHandler {
     private static final String CATEGORY = "key.categories.betterf3reborn";
 
     public static KeyBinding kbCoords, kbSystem, kbGraph, kbCompass, kbFPS, kbRotation;
-    public static KeyBinding kbWorld, kbEntities, kbTargeted, kbDimension, kbMagic, kbBackground, kbBeacon;
+    public static KeyBinding kbWorld, kbEntities, kbTargeted, kbDimension, kbMagic, kbBackground, kbBeacon, kbEditor;
 
     public KeybindHandler() {
         kbCoords = new KeyBinding("key.toggle.coordinates", Keyboard.KEY_NONE, CATEGORY);
@@ -34,6 +35,8 @@ public class KeybindHandler {
         kbBackground = new KeyBinding("key.toggle.background", Keyboard.KEY_NONE, CATEGORY);
         // Neues Keybind für Beacon
         kbBeacon = new KeyBinding("key.toggle.beacon", Keyboard.KEY_MINUS, CATEGORY);
+        // Neues Keybind für Editor (Strg+C)
+        kbEditor = new KeyBinding("key.open.editor", Keyboard.KEY_C, CATEGORY);
 
         ClientRegistry.registerKeyBinding(kbCoords);
         ClientRegistry.registerKeyBinding(kbSystem);
@@ -48,6 +51,7 @@ public class KeybindHandler {
         ClientRegistry.registerKeyBinding(kbMagic);
         ClientRegistry.registerKeyBinding(kbBackground);
         ClientRegistry.registerKeyBinding(kbBeacon);
+        ClientRegistry.registerKeyBinding(kbEditor);
     }
 
     @SubscribeEvent
@@ -95,6 +99,16 @@ public class KeybindHandler {
         if (kbMagic.isPressed()) toggle("Magic Modules", !ModConfig.modules.showBotania);
         if (kbBackground.isPressed()) toggleBackground();
         if (kbBeacon.isPressed()) toggle("Beacon Range", !ModConfig.modules.showBeaconRange);
+        if (kbEditor.isPressed()) openCustomConfig();
+    }
+
+    private void openCustomConfig() {
+        if (mc.currentScreen == null) {
+            mc.displayGuiScreen(new com.worador.f3hud.gui.GuiCustomConfig());
+        } else if (mc.currentScreen instanceof com.worador.f3hud.gui.GuiCustomConfig) {
+            // Wenn bereits auf dem Config-Screen, schließen
+            mc.displayGuiScreen(null);
+        }
     }
 
     private void toggleBackground() {

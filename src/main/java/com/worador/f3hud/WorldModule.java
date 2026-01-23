@@ -10,6 +10,11 @@ import java.util.Random;
 
 public class WorldModule extends InfoModule {
 
+    // Performance Throttling: Update once per second (20 ticks) using tick-based caching
+    private static final int UPDATE_INTERVAL_TICKS = 20;
+    private int lastUpdateTick = -1;
+    private List<InfoLine> cachedLines = new ArrayList<>();
+
     // Caching für Slime Chunks, damit wir nicht jeden Frame rechnen
     private int lastChunkX = Integer.MAX_VALUE;
     private int lastChunkZ = Integer.MAX_VALUE;
@@ -27,29 +32,41 @@ public class WorldModule extends InfoModule {
 
     @Override
     public List<InfoLine> getLines() {
-        List<InfoLine> lines = new ArrayList<>();
-        if (mc.player == null || mc.world == null) return lines;
-
-        BlockPos pos = new BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ);
-
-        if (mc.isSingleplayer() && mc.getIntegratedServer() != null) {
-            long[] times = mc.getIntegratedServer().tickTimeArray;
-            long sum = 0;
-            for (long t : times) sum += t;
-            float tickTime = (float)(sum / (double)times.length) * 1.0E-6F;
-            float tps = (tickTime > 0) ? Math.min(20.0F, 1000.0F / tickTime) : 20.0F;
-            int tpsColor = tps > 18 ? 0x55FF55 : (tps > 12 ? 0xFFFF55 : 0xFF5555);
-
-            lines.add(new InfoLine("Server: ", Math.round(tps*10)/10.0 + " TPS (" + Math.round(tickTime*100)/100.0 + "ms)", tpsColor));
+        // Strict Gating: Early exit if disabled
+        if (!isEnabledInConfig() || mc.player == null || mc.world == null) {
+            return new ArrayList<>();
         }
 
-        lines.add(new InfoLine("Biome: ", mc.world.getBiome(pos).getBiomeName(), ModConfig.colors.colorBiome));
+        int currentTick = mc.player.ticksExisted;
+        
+        // Only update if enough ticks have passed or if it's the first call
+        if (cachedLines.isEmpty() || (currentTick - lastUpdateTick) >= UPDATE_INTERVAL_TICKS) {
+            cachedLines = new ArrayList<>();
+            
+            // Expensive operations inside the refresh block
+            BlockPos pos = new BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ);
 
-        float diff = mc.world.getDifficultyForLocation(pos).getAdditionalDifficulty();
-        long days = mc.world.getWorldTime() / 24000L;
-        lines.add(new InfoLine("Local Difficulty: ", Math.round(diff*100)/100.0 + " (Day " + days + ")", 0xFFFFFF));
+            if (mc.isSingleplayer() && mc.getIntegratedServer() != null) {
+                long[] times = mc.getIntegratedServer().tickTimeArray;
+                long sum = 0;
+                for (long t : times) sum += t;
+                float tickTime = (float)(sum / (double)times.length) * 1.0E-6F;
+                float tps = (tickTime > 0) ? Math.min(20.0F, 1000.0F / tickTime) : 20.0F;
+                int tpsColor = tps > 18 ? 0x55FF55 : (tps > 12 ? 0xFFFF55 : 0xFF5555);
 
-        return lines;
+                cachedLines.add(new InfoLine("Server: ", String.format("%.1f TPS (%.2fms)", tps, tickTime), tpsColor));
+            }
+
+            cachedLines.add(new InfoLine("Biome: ", mc.world.getBiome(pos).getBiomeName(), ModConfig.colors.colorBiome));
+
+            float diff = mc.world.getDifficultyForLocation(pos).getAdditionalDifficulty();
+            long days = mc.world.getWorldTime() / 24000L;
+            cachedLines.add(new InfoLine("Local Difficulty: ", String.format("%.2f (Day %d)", diff, days), 0xFFFFFF));
+            
+            lastUpdateTick = currentTick;
+        }
+        
+        return cachedLines;
     }
 
     private boolean checkSlimeChunk(int x, int z) {
@@ -62,4 +79,4 @@ public class WorldModule extends InfoModule {
         String[] directions = {"South (+Z)", "West (-X)", "North (-Z)", "East (+X)"};
         return directions[i];
     }
-} 
+}

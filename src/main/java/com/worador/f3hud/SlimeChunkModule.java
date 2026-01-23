@@ -87,10 +87,6 @@ public class SlimeChunkModule extends InfoModule {
             int distColor = (minDistance < 16) ? 0x55FF55 : 0xAAAAAA;
             lines.add(new InfoLine("Next Slime: ", String.format(Locale.US, "%.1fm (%s)%s", minDistance, direction, vNav), distColor));
 
-            // Höhen-Hinweis (Beibehalten wie gewünscht)
-            if (mc.player.posY >= 40) {
-                lines.add(new InfoLine("Note: ", "Dig down to Y < 40", 0xAAAAAA));
-            }
         } else {
             lines.add(new InfoLine("Slime Chunk: ", "None in 6 Chunks", 0xFF5555));
         }

@@ -21,7 +21,11 @@ public class WeatherModule extends InfoModule {
     @Override
     public List<InfoLine> getLines() {
         List<InfoLine> lines = new ArrayList<>();
-        if (mc.player == null || mc.world == null) return lines;
+        
+        // Strict Gating: Check config first, before any expensive operations
+        if (!isEnabledInConfig() || mc.player == null || mc.world == null) {
+            return lines;
+        }
 
         BlockPos pos = mc.player.getPosition();
         Biome biome = mc.world.getBiome(pos);
@@ -36,8 +40,19 @@ public class WeatherModule extends InfoModule {
         boolean canRain = biome.canRain();
         boolean canSnow = biome.getEnableSnow() || temp < 0.15F;
 
-        // 1. Lokale Temperatur (Immer aktuell)
-        lines.add(new InfoLine("Biome Temp: ", String.format("%.2f", temp), 0xFFFF55));
+        // 1. Temperatur-Konvertierung: Interner Wert * 30.0 = Celsius
+        float celsius = temp * 30.0f;
+        String tempDisplay;
+        
+        if (ModConfig.modules.showFahrenheit) {
+            // Konvertiere zu Fahrenheit: C * 1.8 + 32
+            float fahrenheit = celsius * 1.8f + 32.0f;
+            tempDisplay = String.format("%.1f°C / %.1f°F", celsius, fahrenheit);
+        } else {
+            tempDisplay = String.format("%.1f°C", celsius);
+        }
+
+        lines.add(new InfoLine("Temperature: ", tempDisplay, 0xFFFF55));
 
         // 2. Wetterstatus & Vorhersage
         if (mc.world.isRaining()) {
@@ -64,8 +79,22 @@ public class WeatherModule extends InfoModule {
             }
         }
 
-        // DEBUG: Jetzt sollten hier im Singleplayer echte Zahlen stehen
-        lines.add(new InfoLine("DEBUG Ticks: ", String.valueOf(info.getRainTime()), 0xAAAAAA));
+        // 3. Storm Forecast (Full weather forecast restoration)
+        if (mc.world.isThundering()) {
+            lines.add(new InfoLine("Storm: ", "Active", 0xFFD700));
+            int stormTime = info.getThunderTime();
+            if (stormTime > 0) {
+                lines.add(new InfoLine("Storm ends in: ", formatTime(stormTime), 0xAAAAAA));
+            }
+        } else if (info.isThundering()) {
+            lines.add(new InfoLine("Storm: ", "Incoming", 0xFF4500));
+            int nextStorm = info.getThunderTime();
+            if (nextStorm > 0) {
+                lines.add(new InfoLine("Storm in: ", formatTime(nextStorm), 0x55FF55));
+            }
+        } else {
+            lines.add(new InfoLine("Storm: ", "None", 0x55FF55));
+        }
 
         return lines;
     }

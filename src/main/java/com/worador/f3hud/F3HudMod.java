@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 public class F3HudMod {
     public static final String MODID = "betterf3reborn";
     public static final String NAME = "Better F3 Reborn";
-    public static final String VERSION = "2.2";
+    public static final String VERSION = "2.2.0-Beta2"; // Version hier aktualisiert
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
@@ -16,11 +16,15 @@ public class F3HudMod {
         ModuleRegistry.init();
 
         // 2. Den Renderer für das HUD registrieren
-        // (Zeichnet das HUD auf den Bildschirm)
         MinecraftForge.EVENT_BUS.register(new DebugRenderer());
 
         // 3. Den KeybindHandler registrieren
-        // (Erstellt die Keybinds im Menü und hört auf Tastendrücke)
         MinecraftForge.EVENT_BUS.register(new KeybindHandler());
+
+        // 4. Chat-Benachrichtigung beim Login registrieren
+        // Wir nutzen eine Instanz, um sie an beiden Bussen anzumelden
+        ModChatNotify chatNotify = new ModChatNotify();
+        MinecraftForge.EVENT_BUS.register(chatNotify);
+        net.minecraftforge.fml.common.FMLCommonHandler.instance().bus().register(chatNotify);
     }
-} 
+}

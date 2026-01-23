@@ -52,7 +52,7 @@ public class ModConfig {
         public boolean showDimension = true;
 
         @Config.LangKey("f3hud.config.modules.showRegion")
-        public boolean showRegion = true;
+        public boolean showRegion = false;
 
         @Config.LangKey("f3hud.config.modules.showTargetedBlock")
         public boolean showTargetedBlock = true;
@@ -75,16 +75,24 @@ public class ModConfig {
         @Config.LangKey("f3hud.config.modules.showPerformanceGraph")
         public boolean showPerformanceGraph = false;
 
+        @Config.Comment("Show travel information (ETA, distance)")
+        @Config.LangKey("f3hud.config.modules.showTravelModule")
+        public boolean showTravelModule = true;
+
+        @Config.Comment("Show detailed chunk information")
+        @Config.LangKey("f3hud.config.modules.showDetailedChunks")
+        public boolean showDetailedChunks = false;
+
         @Config.LangKey("f3hud.config.modules.showCompass")
         public boolean showCompass = true;
 
         @Config.Comment("Show distance to nearest active beacon")
         public boolean showBeaconRange = true;
 
-        // Sauerstoff Anzeige - Keine Config wird immer angezeigt + anderer kleiner Modulscheiß xD
+        // Sauerstoff Anzeige etc.
         public boolean showOxygen = true;
         public boolean showDurability = true;
-        public boolean showPotions = true;
+        public boolean showPotions = true; // Legacy Potions
         public boolean showWeather = true;
         public boolean showSlimeDistance = true;
         public boolean showGrowth = true;
@@ -95,17 +103,64 @@ public class ModConfig {
         public boolean showAggroModule = true;
         public boolean showExplosionTimer = true;
         public boolean showItemDespawn = true;
-        public boolean showHealthStats = true;
+        public boolean showHealthStats = false;
         public boolean showEndModule = true;
         public boolean showVersion = true;
+        public boolean showFahrenheit = false;
+        public boolean showLightLevel = true;
 
-        // Mod-Support
+        // Mod-Support Legacy
         public boolean showAstralSorcery = true;
         public boolean showStellar = true;
         public boolean showBotania = true;
-        public boolean showBloodMagic = true;
-        public boolean showThaumcraft = true;
 
+        @Config.Comment("Show health bars in Mob Aggro module")
+        @Config.LangKey("f3hud.config.modules.showHealthBars")
+        public boolean showHealthBars = false;
+
+        // Mechaniken modules (Standardized)
+        @Config.LangKey("f3hud.config.modules.showSlimeChunk")
+        public boolean showSlimeChunk = true;
+
+        @Config.LangKey("f3hud.config.modules.showEnd")
+        public boolean showEnd = true;
+
+        @Config.LangKey("f3hud.config.modules.showPotion")
+        public boolean showPotion = true;
+
+        @Config.LangKey("f3hud.config.modules.showBeacon")
+        public boolean showBeacon = true;
+
+        @Config.LangKey("f3hud.config.modules.showVillagerTrade")
+        public boolean showVillagerTrade = true;
+
+        @Config.LangKey("f3hud.config.modules.showHealthAndHunger")
+        public boolean showHealthAndHunger = true;
+
+        @Config.LangKey("f3hud.config.modules.showMobAggro")
+        public boolean showMobAggro = true;
+
+        @Config.LangKey("f3hud.config.modules.showExplosion")
+        public boolean showExplosion = true;
+
+        @Config.LangKey("f3hud.config.modules.showItemDespawn")
+        public boolean showItemDespawnModule = true;
+
+        // Mod-Support modules (Standardized)
+        @Config.LangKey("f3hud.config.modules.showAstral")
+        public boolean showAstral = true;
+
+        @Config.LangKey("f3hud.config.modules.showStellar")
+        public boolean showStellarSky = true;
+
+        @Config.LangKey("f3hud.config.modules.showBotania")
+        public boolean showBotaniaMod = true;
+
+        @Config.LangKey("f3hud.config.modules.showBloodMagic")
+        public boolean showBloodMagic = true;
+
+        @Config.LangKey("f3hud.config.modules.showThaumcraft")
+        public boolean showThaumcraft = true;
     }
 
     public static class Colors {
@@ -127,6 +182,32 @@ public class ModConfig {
         @Config.LangKey("f3hud.config.colors.colorBloodMagic") public int colorBloodMagic = 0xCC0000;
         @Config.LangKey("f3hud.config.colors.colorThaumcraft") public int colorThaumcraft = 0xAA55FF;
         @Config.LangKey("f3hud.config.colors.colorAstral") public int colorAstral = 0x99CCFF;
+
+        @Config.LangKey("f3hud.config.colors.colorCompass") public int colorCompass = 0xFFFF55;
+        @Config.LangKey("f3hud.config.colors.colorRegion") public int colorRegion = 0xFFAA55;
+        @Config.LangKey("f3hud.config.colors.colorTargetedBlock") public int colorTargetedBlock = 0xFF55FF;
+        @Config.LangKey("f3hud.config.colors.colorEntityStats") public int colorEntityStats = 0x55FFFF;
+        @Config.LangKey("f3hud.config.colors.colorEntities") public int colorEntities = 0x55FF55;
+        @Config.LangKey("f3hud.config.colors.colorPerformance") public int colorPerformance = 0xFFAA00;
+        @Config.LangKey("f3hud.config.colors.colorVersion") public int colorVersion = 0xAAAAAA;
+        @Config.LangKey("f3hud.config.colors.colorServer") public int colorServer = 0x5555FF;
+
+        @Config.LangKey("f3hud.config.colors.colorSlimeChunk") public int colorSlimeChunk = 0x77FF77;
+        @Config.LangKey("f3hud.config.colors.colorEnd") public int colorEnd = 0x5555FF;
+        @Config.LangKey("f3hud.config.colors.colorOxygen") public int colorOxygen = 0x55FFFF;
+        @Config.LangKey("f3hud.config.colors.colorDurability") public int colorDurability = 0xFF5555;
+        @Config.LangKey("f3hud.config.colors.colorPotion") public int colorPotion = 0xFF55FF;
+        @Config.LangKey("f3hud.config.colors.colorBeacon") public int colorBeacon = 0xFFFF55;
+        @Config.LangKey("f3hud.config.colors.colorWeather") public int colorWeather = 0x5555FF;
+        @Config.LangKey("f3hud.config.colors.colorGrowth") public int colorGrowth = 0x55FF55;
+        @Config.LangKey("f3hud.config.colors.colorSpeedometer") public int colorSpeedometer = 0xFFAA00;
+        @Config.LangKey("f3hud.config.colors.colorVillagerTrade") public int colorVillagerTrade = 0xFFAA55;
+        @Config.LangKey("f3hud.config.colors.colorItemDespawn") public int colorItemDespawn = 0xAAAAAA;
+        @Config.LangKey("f3hud.config.colors.colorHealthAndHunger") public int colorHealthAndHunger = 0xFF5555;
+        @Config.LangKey("f3hud.config.colors.colorMobAggro") public int colorMobAggro = 0xFF0000;
+        @Config.LangKey("f3hud.config.colors.colorMachineProgress") public int colorMachineProgress = 0xAAAAAA;
+        @Config.LangKey("f3hud.config.colors.colorExplosion") public int colorExplosion = 0xFF0000;
+        @Config.LangKey("f3hud.config.colors.colorStellar") public int colorStellar = 0x5555FF;
     }
 
     public static class Position {

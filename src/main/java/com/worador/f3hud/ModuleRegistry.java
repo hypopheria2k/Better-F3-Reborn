@@ -14,43 +14,51 @@ public class ModuleRegistry {
         LEFT.clear();
         RIGHT.clear();
 
-        // LINKER BEREICH
+        // --- LINKER BEREICH (Navigation & Welt-Basis) ---
+        LEFT.clear();
         LEFT.add(new CoordinatesModule());
+        LEFT.add(new SlimeChunkModule());    // Direkt unter Chunk-Daten (Feedback umgesetzt)
         LEFT.add(new ChunkPosModule());
+        LEFT.add(new LightLevelModule());
         LEFT.add(new RotationModule());
         LEFT.add(new WorldModule());
         LEFT.add(new DimensionModule());
+        LEFT.add(new TravelModule());
         LEFT.add(new RegionModule());
         LEFT.add(new TargetedBlockModule());
-        LEFT.add(new EntityStatsModule());
         LEFT.add(new EntitiesModule());
-        LEFT.add(new PerformanceModule());
+        LEFT.add(new EntityStatsModule());  // Hierher verschoben, passt zu Entities
         LEFT.add(new CompassModule());
-        LEFT.add(new SlimeChunkModule());
+        LEFT.add(new PerformanceModule());
         LEFT.add(new EndModule());
 
-        // RECHTER BEREICH
+        // --- RECHTER BEREICH (Spieler-Status & Mod-Interaktion) ---
+        RIGHT.clear();
         RIGHT.add(new SystemModule());
+        RIGHT.add(new VersionModule());     // Technische Info als Header rechts
 
+        // Mod-Support Bereich
         if (Loader.isModLoaded("astralsorcery")) RIGHT.add(new AstralModule());
-        if (Loader.isModLoaded("stellar_core")) RIGHT.add(new StellarModule());
-        if (Loader.isModLoaded("botania"))      RIGHT.add(new BotaniaModule());
-        if (Loader.isModLoaded("bloodmagic"))   RIGHT.add(new BloodMagicModule());
-        if (Loader.isModLoaded("thaumcraft"))   RIGHT.add(new ThaumcraftModule());
+        if (Loader.isModLoaded("stellar_core"))  RIGHT.add(new StellarModule());
+        if (Loader.isModLoaded("botania"))       RIGHT.add(new BotaniaModule());
+        if (Loader.isModLoaded("bloodmagic"))    RIGHT.add(new BloodMagicModule());
+        if (Loader.isModLoaded("thaumcraft"))    RIGHT.add(new ThaumcraftModule());
 
+        // Vital-Werte & Status (Kritische Infos)
+        RIGHT.add(new HealthAndHungerModule()); // Höher priorisiert für bessere Sichtbarkeit
         RIGHT.add(new OxygenModule());
-        RIGHT.add(new DurabilityModule());
         RIGHT.add(new PotionModule());
-        RIGHT.add(new BeaconModule());
+        RIGHT.add(new DurabilityModule());
+        RIGHT.add(new SpeedometerModule());
+
+        // Welt-Interaktion & Automatisierung
         RIGHT.add(new WeatherModule());
         RIGHT.add(new GrowthModule());
-        RIGHT.add(new SpeedometerModule());
         RIGHT.add(new VillagerTradeModule());
         RIGHT.add(new ItemDespawnModule());
-        RIGHT.add(new HealthAndHungerModule());
-        RIGHT.add(new MobAggroModule());
         RIGHT.add(new MachineProgressModule());
-        RIGHT.add(new VersionModule());
+        RIGHT.add(new MobAggroModule());
+        RIGHT.add(new BeaconModule());
     }
 
     public static InfoModule getCompassModule() {

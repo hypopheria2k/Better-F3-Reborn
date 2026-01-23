@@ -25,7 +25,11 @@ public class EntitiesModule extends InfoModule {
     @Override
     public List<InfoLine> getLines() {
         List<InfoLine> lines = new ArrayList<>();
-        if (mc.world == null) return lines;
+        
+        // Strict Gating: Check config first, before any expensive operations
+        if (!isEnabledInConfig() || mc.world == null) {
+            return lines;
+        }
 
         // 1. Render-Statistiken (Wie viele siehst du wirklich)
         String debugEntities = mc.renderGlobal.getDebugInfoEntities();

@@ -6,6 +6,11 @@ import java.util.List;
 
 public class StellarModule extends InfoModule {
 
+    // Performance Throttling: Update once per second (20 ticks) using tick-based caching
+    private static final int UPDATE_INTERVAL_TICKS = 20;
+    private int lastUpdateTick = -1;
+    private List<InfoLine> cachedLines = new ArrayList<>();
+
     @Override
     public String getName() {
         return "StellarCore";
@@ -13,21 +18,29 @@ public class StellarModule extends InfoModule {
 
     @Override
     protected boolean isEnabledInConfig() {
-        // Prüft, ob die Mod installiert ist UND ob sie in der Config aktiviert wurde
+        // Strict Gating: Check config first, before any expensive operations
         return Loader.isModLoaded("stellar_core") && ModConfig.modules.showStellar;
     }
 
     @Override
     public List<InfoLine> getLines() {
-        List<InfoLine> lines = new ArrayList<>();
-
-        // Da isEnabledInConfig bereits den Mod-Check macht,
-        // müssen wir hier nur noch sicherstellen, dass die Welt geladen ist.
-        if (mc.world != null) {
-            // Aufruf der Logik im compat-Paket
-            lines.addAll(com.worador.f3hud.compat.StellarCompat.getStellarLines(mc.world));
+        // Strict Gating: Early exit if disabled
+        if (!isEnabledInConfig() || mc.player == null || mc.world == null) {
+            return new ArrayList<>();
         }
 
-        return lines;
+        int currentTick = mc.player.ticksExisted;
+        
+        // Only update if enough ticks have passed or if it's the first call
+        if (cachedLines.isEmpty() || (currentTick - lastUpdateTick) >= UPDATE_INTERVAL_TICKS) {
+            cachedLines = new ArrayList<>();
+            
+            // Expensive operations inside the refresh block
+            cachedLines.addAll(com.worador.f3hud.compat.StellarCompat.getStellarLines(mc.world));
+            
+            lastUpdateTick = currentTick;
+        }
+        
+        return cachedLines;
     }
-} 
+}

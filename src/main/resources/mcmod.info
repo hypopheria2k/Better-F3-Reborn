@@ -3,7 +3,7 @@
     "modid": "f3hud",
     "name": "Better F3 Reloaded",
     "description": "A highly customizable and animated F3 HUD replacement.",
-    "version": "2.2.0-Beta1",
+    "version": "2.2.0-Beta2",
     "mcversion": "1.12.2",
     "url": "",
     "updateUrl": "",
@@ -13,4 +13,4 @@
     "screenshots": [],
     "dependencies": []
   }
-] 
+]

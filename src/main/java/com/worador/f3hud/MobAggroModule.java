@@ -24,10 +24,14 @@ public class MobAggroModule extends InfoModule {
     @Override
     public List<InfoLine> getLines() {
         List<InfoLine> lines = new ArrayList<>();
-        if (mc.player == null || mc.world == null) return lines;
+        
+        // Strict Gating: Check config first, before any expensive operations
+        if (!isEnabledInConfig() || mc.player == null || mc.world == null) {
+            return lines;
+        }
 
-        // Erhöhte Reichweite: 35 Meter deckt ca. 2 Chunks ab
-        double radius = 35.0;
+        // Reduzierte Reichweite: 24 Meter deckt ausreichend ab und entlastet CPU
+        double radius = 24.0;
         AxisAlignedBB area = mc.player.getEntityBoundingBox().grow(radius);
         List<EntityMob> mobs = mc.world.getEntitiesWithinAABB(EntityMob.class, area);
 
@@ -64,20 +68,26 @@ public class MobAggroModule extends InfoModule {
                 int color = getDistanceColor(entry.distance);
                 String name = entry.mob.getDisplayName().getUnformattedText();
 
-                // --- NEU: Detaillierte Health-Berechnung & Diagramm ---
+                // --- NEU: Detaillierte Health-Berechnung ---
                 float currentHP = entry.mob.getHealth();
                 float maxHP = entry.mob.getMaxHealth();
                 float hpPercent = (currentHP / maxHP) * 100;
 
-                // Erstellung des Diagramms [||||||----]
-                int barLength = 10;
-                int filled = Math.round(hpPercent / 10);
-                StringBuilder barBuilder = new StringBuilder("[");
-                for (int i = 0; i < barLength; i++) {
-                    barBuilder.append(i < filled ? "|" : "-");
+                // Standardmäßig nur Textwert anzeigen
+                String healthInfo = String.format("%.1f/%.1f", currentHP, maxHP);
+                
+                // Balken nur anzeigen, wenn showHealthBars aktiviert ist
+                if (ModConfig.modules.showHealthBars) {
+                    // Erstellung des Diagramms [||||||----]
+                    int barLength = 10;
+                    int filled = Math.round(hpPercent / 10);
+                    StringBuilder barBuilder = new StringBuilder("[");
+                    for (int i = 0; i < barLength; i++) {
+                        barBuilder.append(i < filled ? "|" : "-");
+                    }
+                    barBuilder.append("]");
+                    healthInfo = barBuilder.toString() + " " + healthInfo;
                 }
-                barBuilder.append("]");
-                String healthBar = barBuilder.toString();
                 // -------------------------------------------------------
 
                 // Creeper-Spezialwarnung (Zündungs-Check)
@@ -97,8 +107,8 @@ public class MobAggroModule extends InfoModule {
                 }
 
                 // Anzeige: Name, Diagramm, Prozent und Absolute Zahlen
-                String infoText = String.format("%s %s %.0f%% (%.1f/%.1f) %.1fm",
-                        name, healthBar, hpPercent, currentHP, maxHP, entry.distance);
+                String infoText = String.format("%s %.0f%% %s %.1fm",
+                        name, hpPercent, healthInfo, entry.distance);
 
                 lines.add(new InfoLine(
                         warningPrefix + "AGGRO",

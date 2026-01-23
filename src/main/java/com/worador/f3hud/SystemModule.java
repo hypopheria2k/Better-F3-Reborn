@@ -29,6 +29,11 @@ public class SystemModule extends InfoModule {
     public List<InfoLine> getLines() {
         List<InfoLine> lines = new ArrayList<>();
 
+        // Strict Gating: Check config first, before any expensive operations
+        if (!isEnabledInConfig()) {
+            return lines;
+        }
+
         if (cachedCPU == null) {
             cachedCPU = fetchCPUName();
             cpuThreads = Runtime.getRuntime().availableProcessors();
@@ -148,4 +153,4 @@ public class SystemModule extends InfoModule {
     public int getHeight() {
         return 11 * 4 + 2;
     }
-} 
+}

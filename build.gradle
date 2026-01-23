@@ -12,7 +12,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = "1.12.2-V2.2.0-BETA1"
+version = "1.12.2-V2.2.0-BETA2"
 group = "com.worador.f3hud" 
 archivesBaseName = "BetterF3Reborn" 
 
