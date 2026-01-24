@@ -91,9 +91,12 @@ public class DebugRenderer {
     private void renderStaticElements(ScaledResolution sr) {
         if (ModConfig.modules.showPerformanceGraph) {
             float eased = easeOutCubic(animProgress);
+            // Graph bleibt unten links fixiert
             int graphX = 5;
-            int graphY = ModConfig.forceOpen ? sr.getScaledHeight() - 75 : sr.getScaledHeight() - 65;
+            int graphY = sr.getScaledHeight() - 65;
+
             GlStateManager.pushMatrix();
+            // Animation von unten nach oben
             GlStateManager.translate(0, (1.0f - eased) * 70, 0);
             performanceGraph.renderAt(graphX, graphY, 120, 60, animProgress);
             GlStateManager.popMatrix();
@@ -113,8 +116,6 @@ public class DebugRenderer {
                 float easedCompass = easeOutCubic(compassProgress);
 
                 int centerX = sr.getScaledWidth() / 2;
-
-                // Korrektur: -68 ist der ideale Abstand zum Standard-HUD
                 int compassY = sr.getScaledHeight() - 50 - ModConfig.position.compassYOffset;
 
                 GlStateManager.pushMatrix();
@@ -141,16 +142,20 @@ public class DebugRenderer {
 
         if (ModConfig.modules.showFPS) {
             drawFPSLine(x, y);
-            y += 11;
+            // Nach der FPS Zeile lassen wir etwas Platz
+            y += 15;
         }
 
         for (InfoModule module : ModuleRegistry.getLeftModules()) {
             if (!module.isEnabled()) continue;
-            String name = module.getName();
-            if (name.equals("Compass") || name.equals("Performance Graph") || name.equals("FPS")) continue;
+            if (module instanceof CompassModule || module instanceof PerformanceModule) continue;
 
+            // Wir rufen den Renderer auf
             RendererRegistry.getRenderer(module).render(module, x, y, animProgress);
-            y += (module.getLines().size() * 11);
+
+            // FIX: Erhöhe den Abstand nach jedem Modul-Block deutlich (z.B. +4 statt +2)
+            // Das verhindert, dass die Boxen sich berühren oder clippen.
+            y += (module.getHeight() + 6);
         }
         GlStateManager.popMatrix();
     }
@@ -159,25 +164,35 @@ public class DebugRenderer {
         GlStateManager.pushMatrix();
         float scale = (float) ModConfig.position.userScale;
 
+        // 1. Animation (Rechts-Slide)
         if (ModConfig.animation.enableAnimation) {
             float eased = easeOutCubic(animProgress);
             float slide = (float) ModConfig.animation.slideDistance;
             GlStateManager.translate((1.0f - eased) * slide, 0, 0);
         }
 
+        // 2. Skalierung anwenden
         GlStateManager.scale(scale, scale, 1.0f);
+
+        // 3. Basis-Berechnung (WICHTIG: Alles muss durch scale geteilt werden!)
         float xBase = sr.getScaledWidth() / scale;
         float y = (float) (ModConfig.position.rightY / scale);
-        float rXOffset = (float) (ModConfig.position.rightX / scale);
+        float rXMargin = (float) (ModConfig.position.rightX / scale); // Deine 8px
 
         for (InfoModule module : ModuleRegistry.getRightModules()) {
             if (!module.isEnabled()) continue;
 
+            // Wir holen die tatsächliche Breite des Moduls
             int moduleWidth = module.getMaxLineWidth();
-            float x = xBase - moduleWidth - rXOffset;
 
-            RendererRegistry.getRenderer(module).render(module, (int) x, (int) y, animProgress);
-            y += (module.getLines().size() * 11);
+            // BERECHNUNG: Rechter Rand - Modulbreite - Config-Abstand
+            int x = (int) (xBase - moduleWidth - rXMargin);
+
+            // Rendern ohne Kat-Coder's "finalX" Begrenzung
+            RendererRegistry.getRenderer(module).render(module, x, (int) y, animProgress);
+
+            // Y weiterschieben für das nächste Modul (+2px Padding)
+            y += (module.getHeight() + 2);
         }
         GlStateManager.popMatrix();
     }
@@ -197,4 +212,4 @@ public class DebugRenderer {
 
         mc.fontRenderer.drawStringWithShadow(fullText, x, y, ModConfig.colors.colorFPS);
     }
-} 
+}

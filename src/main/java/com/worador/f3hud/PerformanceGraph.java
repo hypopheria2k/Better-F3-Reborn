@@ -66,38 +66,46 @@ public class PerformanceGraph {
     private void drawGraphLines(int x, int y, int width, int height, float animProgress) {
         if (fpsHistory.size() < 2) return;
 
+        // 1. Universelle Range-Ermittlung
+        int maxInHistory = 0;
+        for (int f : fpsHistory) {
+            if (f > maxInHistory) maxInHistory = f;
+        }
+
+        // Wir setzen ein Basis-Maximum von 60, aber wenn der Spieler mehr hat,
+        // passt sich der Graph automatisch nach oben an.
+        float displayMax = Math.max(60.0f, maxInHistory + 10);
+        float displayMin = 0; // Für die universelle Vergleichbarkeit starten wir bei 0
+
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
 
-        // DAS HIER IST DER FIX FÜR DIE MAGISCHE VERSCHWUNDENE LINIE:
         GlStateManager.disableTexture2D();
         GlStateManager.enableBlend();
-        GlStateManager.glLineWidth(2.5f);
+        GlStateManager.glLineWidth(2.0f);
 
         buffer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
 
         float xStep = (float) width / (MAX_SAMPLES - 1);
-        int currentSamples = fpsHistory.size();
-        float xOffset = x + width - ((currentSamples - 1) * xStep);
+        float xOffset = x + width - ((fpsHistory.size() - 1) * xStep);
 
         int i = 0;
         for (int fps : fpsHistory) {
-            float val = Math.min(fps, 120.0f);
             float renderX = xOffset + (i * xStep);
-            float renderY = y + height - (val / 120.0f * (height - 15)) - 5;
 
-            int color = getDynamicColor(fps); // Hier nutzt er deine Grün-Gelb-Rot Logik
-            int r = (color >> 16) & 0xFF;
-            int g = (color >> 8) & 0xFF;
-            int b = color & 0xFF;
+            // Universelle Skalierung: FPS im Verhältnis zum dynamischen Maximum
+            float ratio = (float) fps / displayMax;
+            // -15 für Padding oben (Textplatz), -5 für Padding unten
+            float renderY = y + height - (ratio * (height - 20)) - 5;
+
+            int color = getDynamicColor(fps);
+            int r = (color >> 16) & 0xFF, g = (color >> 8) & 0xFF, b = color & 0xFF;
             int a = (int)(animProgress * 255);
 
             buffer.pos(renderX, renderY, 0).color(r, g, b, a).endVertex();
             i++;
         }
         tessellator.draw();
-
-        // Texturen wieder an, sonst ist der Rest vom Minecraft-HUD kaputt!
         GlStateManager.enableTexture2D();
     }
 
@@ -114,4 +122,4 @@ public class PerformanceGraph {
             return ((int)(255 - 170 * f) << 16) | (255 << 8) | 85;
         }
     }
-} 
+}

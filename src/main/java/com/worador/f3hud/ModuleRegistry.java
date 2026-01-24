@@ -15,27 +15,30 @@ public class ModuleRegistry {
         RIGHT.clear();
 
         // --- LINKER BEREICH (Navigation & Welt-Basis) ---
-        LEFT.clear();
         LEFT.add(new CoordinatesModule());
-        LEFT.add(new SlimeChunkModule());    // Direkt unter Chunk-Daten (Feedback umgesetzt)
         LEFT.add(new ChunkPosModule());
+        LEFT.add(new SlimeChunkModule());
         LEFT.add(new LightLevelModule());
         LEFT.add(new RotationModule());
-        LEFT.add(new WorldModule());
+
+        // Dummy-Module für die GUI-Steuerung (geben keine Zeilen aus)
         LEFT.add(new DimensionModule());
+        LEFT.add(new BiomeModule());
+
+        // Hauptmodul: Verarbeitet Dimension, Biome, TPS, Facing & Day
+        LEFT.add(new WorldModule());
+
         LEFT.add(new TravelModule());
         LEFT.add(new RegionModule());
         LEFT.add(new TargetedBlockModule());
         LEFT.add(new EntitiesModule());
-        LEFT.add(new EntityStatsModule());  // Hierher verschoben, passt zu Entities
+        LEFT.add(new EntityStatsModule());
         LEFT.add(new CompassModule());
-        LEFT.add(new PerformanceModule());
+        LEFT.add(PerformanceModule.INSTANCE);
         LEFT.add(new EndModule());
 
         // --- RECHTER BEREICH (Spieler-Status & Mod-Interaktion) ---
-        RIGHT.clear();
         RIGHT.add(new SystemModule());
-        RIGHT.add(new VersionModule());     // Technische Info als Header rechts
 
         // Mod-Support Bereich
         if (Loader.isModLoaded("astralsorcery")) RIGHT.add(new AstralModule());
@@ -45,7 +48,7 @@ public class ModuleRegistry {
         if (Loader.isModLoaded("thaumcraft"))    RIGHT.add(new ThaumcraftModule());
 
         // Vital-Werte & Status (Kritische Infos)
-        RIGHT.add(new HealthAndHungerModule()); // Höher priorisiert für bessere Sichtbarkeit
+        RIGHT.add(new HealthAndHungerModule());
         RIGHT.add(new OxygenModule());
         RIGHT.add(new PotionModule());
         RIGHT.add(new DurabilityModule());
@@ -59,6 +62,8 @@ public class ModuleRegistry {
         RIGHT.add(new MachineProgressModule());
         RIGHT.add(new MobAggroModule());
         RIGHT.add(new BeaconModule());
+        RIGHT.add(new ServerModule());
+        RIGHT.add(new VersionModule());
     }
 
     public static InfoModule getCompassModule() {
@@ -69,11 +74,7 @@ public class ModuleRegistry {
     }
 
     public static InfoModule getGraphModule() {
-        for (InfoModule m : LEFT) {
-            // Geändert von PerformanceGraphModule auf PerformanceModule
-            if (m instanceof PerformanceModule) return m;
-        }
-        return null;
+        return PerformanceModule.INSTANCE;
     }
 
     public static List<InfoModule> getLeftModules() {

@@ -1,13 +1,12 @@
 package com.worador.f3hud;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 public class CoordinatesModule extends InfoModule {
-    private static final int UPDATE_INTERVAL_TICKS = 2; // Schneller für flüssige Bewegung
-    private int lastUpdateTick = -1;
+    private double lastX, lastY, lastZ;
     private List<InfoLine> cachedLines = new ArrayList<>();
 
     @Override public String getName() { return "Coordinates"; }
@@ -16,27 +15,31 @@ public class CoordinatesModule extends InfoModule {
     @Override
     public List<InfoLine> getLines() {
         if (!isEnabledInConfig() || mc.player == null) return new ArrayList<>();
-        int currentTick = mc.player.ticksExisted;
 
-        if (cachedLines.isEmpty() || (currentTick - lastUpdateTick) >= UPDATE_INTERVAL_TICKS) {
-            cachedLines = new ArrayList<>();
-            BlockPos blockPos = new BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ);
-
-            // XYZ
-            int yColor = ModConfig.colors.colorY;
-            if (mc.player.posY >= 10.0 && mc.player.posY <= 13.0) yColor = 0x55FFFF;
-            else if (mc.player.posY < 5.0) yColor = 0xAA00AA;
-
-            cachedLines.add(new InfoLine("X: ", String.format(Locale.US, "%.1f ", mc.player.posX), ModConfig.colors.colorX));
-            cachedLines.add(new InfoLine("Y: ", String.format(Locale.US, "%.1f ", mc.player.posY), yColor));
-            cachedLines.add(new InfoLine("Z: ", String.format(Locale.US, "%.1f", mc.player.posZ), ModConfig.colors.colorZ));
-
-            // Block & Chunk
-            cachedLines.add(new InfoLine("Block: ", String.format("X:%d Y:%d Z:%d", blockPos.getX(), blockPos.getY(), blockPos.getZ()), ModConfig.colors.colorBlock));
-            cachedLines.add(new InfoLine("Chunk: ", String.format("ID: %d, %d | Pos: %d %d %d", blockPos.getX() >> 4, blockPos.getZ() >> 4, blockPos.getX() & 15, blockPos.getY() & 15, blockPos.getZ() & 15), ModConfig.colors.colorChunk));
-
-            lastUpdateTick = currentTick;
+        // Performance: Nur bei tatsächlicher Bewegung neu berechnen
+        if (mc.player.posX == lastX && mc.player.posY == lastY && mc.player.posZ == lastZ && !cachedLines.isEmpty()) {
+            return cachedLines;
         }
-        return cachedLines;
+
+        this.lastX = mc.player.posX;
+        this.lastY = mc.player.posY;
+        this.lastZ = mc.player.posZ;
+
+        // WICHTIG: Liste komplett neu initialisieren
+        List<InfoLine> lines = new ArrayList<>();
+
+        // 1. XYZ Zeile - Präzise 3 Nachkommastellen (wie gewünscht)
+        // Nutzt minY für die exakte Standhöhe
+        double displayY = mc.player.getEntityBoundingBox().minY;
+        String xyzCoords = String.format(Locale.US, "%.3f / %.3f / %.3f", lastX, displayY, lastZ);
+        lines.add(new InfoLine("XYZ: ", xyzCoords, ModConfig.colors.colorX));
+
+        // 2. Chunk Zeile - IDs
+        int chunkX = MathHelper.floor(lastX) >> 4;
+        int chunkZ = MathHelper.floor(lastZ) >> 4;
+        lines.add(new InfoLine("Chunk ID: ", chunkX + " " + chunkZ, ModConfig.colors.colorChunk));
+
+        this.cachedLines = lines;
+        return lines;
     }
 }

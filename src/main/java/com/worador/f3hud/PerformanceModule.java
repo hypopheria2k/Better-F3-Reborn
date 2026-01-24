@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PerformanceModule extends InfoModule {
+public static final PerformanceModule INSTANCE = new PerformanceModule();
+
+    // Eine statische Instanz, damit die Daten (fpsHistory) erhalten bleiben
+    private static final PerformanceGraph GRAPH = new PerformanceGraph();
 
     @Override
     public String getName() {
@@ -12,25 +16,34 @@ public class PerformanceModule extends InfoModule {
 
     @Override
     protected boolean isEnabledInConfig() {
-        // Nutzt die zentrale Config-Option für den Graphen
         return ModConfig.modules.showPerformanceGraph;
+    }
+
+    // WICHTIG: Die update-Logik muss getickt werden!
+    public void onTick() {
+        if (isEnabledInConfig()) {
+            GRAPH.update();
+        }
     }
 
     @Override
     public List<InfoLine> getLines() {
-        // Der Graph wird separat gerendert, daher keine Textzeilen
-        return new ArrayList<>();
+        return new ArrayList<>(); // Bleibt leer, da wir selbst zeichnen
     }
 
     @Override
     public int getHeight() {
-        // 60px für den Graphen + 15px Padding für das nächste Modul
-        return 75;
+        return 75; // Reserviert den Platz im HUD
     }
 
     @Override
     public int getMaxLineWidth() {
-        // Entspricht der festen Breite des Graphen
-        return 200;
+        return 200; // Breite des Graphen
     }
-} 
+
+    // Wir brauchen eine Methode, die vom Renderer aufgerufen wird
+    public void renderCustom(int x, int y, float animProgress) {
+        // Hier rufen wir die render-Logik deiner anderen Klasse auf
+        GRAPH.renderAt(x, y, getMaxLineWidth(), getHeight() - 15, animProgress);
+    }
+}

@@ -32,142 +32,268 @@ public class ModConfig {
     @Config.LangKey("f3hud.config.category.animation")
     public static Animation animation = new Animation();
 
-    public static class Modules {
-        @Config.LangKey("f3hud.config.modules.showChatMessages")
-        public boolean showChatMessages = false;
+    /**
+     * Wendet eines der drei Presets an.
+     * 0 = General, 1 = PvP/Survival, 2 = Technical
+     */
+    public static void applyPreset(int type) {
+        // Erstmal alles auf einen definierten Zustand bringen
+        setAllModules(false);
 
+        switch (type) {
+            case 0: // GENERAL (Gameplay & Immersion)
+                modules.showFPS = true;
+                modules.showCoordinates = true;
+                modules.showBiome = true;
+                modules.showLightLevel = true;
+                modules.showDimension = true;
+                modules.showGrowth = true;
+                modules.showHealthAndHunger = true;
+                modules.showHealthStats = true;
+                modules.showTime = true;
+                modules.showWeather = true;
+                break;
+
+            case 1: // PVP / SURVIVAL (Effizienz)
+                modules.showFPS = true;
+                modules.showCoordinates = true;
+                modules.showSpeedometer = true;
+                modules.showPotion = true;
+                modules.showDurability = true;
+                modules.showMobAggro = true;
+                modules.showAggroModule = true;
+                modules.showItemDespawn = true;
+                modules.showOxygen = true;
+                modules.showHealthAndHunger = true;
+                modules.showHealthStats = true;
+                break;
+
+            case 2: // TECHNICAL (Debugging & Technik)
+                modules.showFPS = true;
+                modules.showCoordinates = true;
+                modules.showChunkPos = true;
+                modules.showRotation = true;
+                modules.showWorld = true;
+                modules.showRegion = true;
+                modules.showDetailedChunks = true;
+                modules.showTargetedBlock = true;
+                modules.showEntityStats = true;
+                modules.showEntities = true;
+                modules.showPerformanceGraph = true;
+                modules.showSystem = true;
+                modules.showServer = true;
+                modules.showMachineProgress = true;
+                break;
+        }
+        // Änderungen permanent speichern
+        ConfigManager.sync("betterf3reborn", Config.Type.INSTANCE);
+    }
+
+    /**
+     * Hilfsmethode um alle Module auf einmal zu schalten
+     */
+    private static void setAllModules(boolean state) {
+        modules.showFPS = state;
+        modules.showCoordinates = state;
+        modules.showBiome = state;
+        modules.showLightLevel = state;
+        modules.showDimension = state;
+        modules.showVersion = state;
+        modules.showCompass = state;
+        modules.showSlimeChunk = state;
+        modules.showSlimeDistance = state;
+        modules.showSpeedometer = state;
+        modules.showWeather = state;
+        modules.showTime = state;
+        modules.showChunkPos = state;
+        modules.showDurability = state;
+        modules.showGrowth = state;
+        modules.showPotion = state;
+        modules.showOxygen = state;
+        modules.showMobAggro = state;
+        modules.showAggroModule = state;
+        modules.showVillagerTrade = state;
+        modules.showVillagerStatus = state;
+        modules.showItemDespawn = state;
+        modules.showExplosion = state;
+        modules.showHealthAndHunger = state;
+        modules.showHealthStats = state;
+        modules.showBeacon = state;
+        modules.showBeaconRange = state;
+        modules.showMachineProgress = state;
+        modules.showRotation = state;
+        modules.showWorld = state;
+        modules.showRegion = state;
+        modules.showDetailedChunks = state;
+        modules.showTargetedBlock = state;
+        modules.showEntityStats = state;
+        modules.showEntities = state;
+        modules.showPerformanceGraph = state;
+        modules.showSystem = state;
+        modules.showServer = state;
+        modules.showTravelModule = state;
+        modules.showHealthBars = state;
+        modules.showAstral = state;
+        modules.showAstralSorcery = state;
+        modules.showStellar = state;
+        modules.showBotania = state;
+        modules.showBloodMagic = state;
+        modules.showThaumcraft = state;
+        modules.showEnd = state;
+    }
+
+    public static class Modules {
+        // Kategorie: General Info
         @Config.LangKey("f3hud.config.modules.showFPS")
         public boolean showFPS = true;
 
         @Config.LangKey("f3hud.config.modules.showCoordinates")
         public boolean showCoordinates = true;
 
-        @Config.LangKey("f3hud.config.modules.showRotation")
-        public boolean showRotation = true;
+        @Config.LangKey("f3hud.config.modules.showBiome")
+        public boolean showBiome = true;
 
-        @Config.LangKey("f3hud.config.modules.showWorld")
-        public boolean showWorld = true;
+        @Config.LangKey("f3hud.config.modules.showLightLevel")
+        public boolean showLightLevel = true;
 
         @Config.LangKey("f3hud.config.modules.showDimension")
         public boolean showDimension = true;
 
-        @Config.LangKey("f3hud.config.modules.showRegion")
-        public boolean showRegion = false;
+        @Config.LangKey("f3hud.config.modules.showVersion")
+        public boolean showVersion = true;
 
-        @Config.LangKey("f3hud.config.modules.showTargetedBlock")
-        public boolean showTargetedBlock = true;
-
-        @Config.LangKey("f3hud.config.modules.showEntityStats")
-        public boolean showEntityStats = true;
-
-        @Config.LangKey("f3hud.config.modules.showEntities")
-        public boolean showEntities = true;
-
-        @Config.Comment("Show System & Server Info (TPS, RAM, CPU, GPU)")
-        @Config.LangKey("f3hud.config.modules.showSystem")
-        public boolean showSystem = true;
-
-        @Config.Comment("Show server information like IP and MOTD.")
-        @Config.LangKey("f3hud.config.modules.showServer")
-        public boolean showServer = true;
-
-        @Config.Comment("Show Performance Graph (F3 + X)")
-        @Config.LangKey("f3hud.config.modules.showPerformanceGraph")
-        public boolean showPerformanceGraph = false;
-
-        @Config.Comment("Show travel information (ETA, distance)")
-        @Config.LangKey("f3hud.config.modules.showTravelModule")
-        public boolean showTravelModule = true;
-
-        @Config.Comment("Show detailed chunk information")
-        @Config.LangKey("f3hud.config.modules.showDetailedChunks")
-        public boolean showDetailedChunks = false;
-
+        // Kategorie: World & Navigation
         @Config.LangKey("f3hud.config.modules.showCompass")
         public boolean showCompass = true;
 
-        @Config.Comment("Show distance to nearest active beacon")
-        public boolean showBeaconRange = true;
-
-        // Sauerstoff Anzeige etc.
-        public boolean showOxygen = true;
-        public boolean showDurability = true;
-        public boolean showPotions = true; // Legacy Potions
-        public boolean showWeather = true;
-        public boolean showSlimeDistance = true;
-        public boolean showGrowth = true;
-        public boolean showSpeedometer = true;
-        public boolean showVillagerStatus = true;
-        public boolean showChunkPos = true;
-        public boolean showMachineProgress = true;
-        public boolean showAggroModule = true;
-        public boolean showExplosionTimer = true;
-        public boolean showItemDespawn = true;
-        public boolean showHealthStats = false;
-        public boolean showEndModule = true;
-        public boolean showVersion = true;
-        public boolean showFahrenheit = false;
-        public boolean showLightLevel = true;
-
-        // Mod-Support Legacy
-        public boolean showAstralSorcery = true;
-        public boolean showStellar = true;
-        public boolean showBotania = true;
-
-        @Config.Comment("Show health bars in Mob Aggro module")
-        @Config.LangKey("f3hud.config.modules.showHealthBars")
-        public boolean showHealthBars = false;
-
-        // Mechaniken modules (Standardized)
         @Config.LangKey("f3hud.config.modules.showSlimeChunk")
         public boolean showSlimeChunk = true;
+        public boolean showSlimeDistance = true;
 
-        @Config.LangKey("f3hud.config.modules.showEnd")
-        public boolean showEnd = true;
+        @Config.LangKey("f3hud.config.modules.showSpeedometer")
+        public boolean showSpeedometer = true;
+
+        @Config.LangKey("f3hud.config.modules.showWeather")
+        public boolean showWeather = true;
+
+        @Config.LangKey("f3hud.config.modules.showTime")
+        public boolean showTime = true;
+
+        @Config.LangKey("f3hud.config.modules.showChunkPos")
+        public boolean showChunkPos = false;
+
+        // Kategorie: Gameplay Helpers
+        @Config.LangKey("f3hud.config.modules.showDurability")
+        public boolean showDurability = true;
+
+        @Config.LangKey("f3hud.config.modules.showGrowth")
+        public boolean showGrowth = true;
 
         @Config.LangKey("f3hud.config.modules.showPotion")
         public boolean showPotion = true;
 
-        @Config.LangKey("f3hud.config.modules.showBeacon")
-        public boolean showBeacon = true;
-
-        @Config.LangKey("f3hud.config.modules.showVillagerTrade")
-        public boolean showVillagerTrade = true;
-
-        @Config.LangKey("f3hud.config.modules.showHealthAndHunger")
-        public boolean showHealthAndHunger = true;
+        @Config.LangKey("f3hud.config.modules.showOxygen")
+        public boolean showOxygen = true;
 
         @Config.LangKey("f3hud.config.modules.showMobAggro")
         public boolean showMobAggro = true;
 
+        @Config.Comment("Alias for MobAggro (Fixed Compiler Error)")
+        public boolean showAggroModule = true;
+
+        @Config.LangKey("f3hud.config.modules.showVillagerTrade")
+        public boolean showVillagerTrade = true;
+        public boolean showVillagerStatus = true;
+
+        @Config.LangKey("f3hud.config.modules.showItemDespawn")
+        public boolean showItemDespawn = true;
+
         @Config.LangKey("f3hud.config.modules.showExplosion")
         public boolean showExplosion = true;
 
-        @Config.LangKey("f3hud.config.modules.showItemDespawn")
-        public boolean showItemDespawnModule = true;
+        @Config.LangKey("f3hud.config.modules.showHealthAndHunger")
+        public boolean showHealthAndHunger = true;
 
-        // Mod-Support modules (Standardized)
+        @Config.Comment("Fixt Compiler Error in HealthAndHungerModule")
+        public boolean showHealthStats = true;
+
+        @Config.LangKey("f3hud.config.modules.showBeacon")
+        public boolean showBeacon = true;
+
+        @Config.Comment("Toggle Beacon range display logic")
+        public boolean showBeaconRange = true;
+
+        @Config.LangKey("f3hud.config.modules.showMachineProgress")
+        public boolean showMachineProgress = true;
+
+        // Kategorie: Technical/Debug (Default: false)
+        @Config.LangKey("f3hud.config.modules.showRotation")
+        public boolean showRotation = false;
+
+        @Config.LangKey("f3hud.config.modules.showWorld")
+        public boolean showWorld = false;
+
+        @Config.LangKey("f3hud.config.modules.showRegion")
+        public boolean showRegion = false;
+
+        @Config.LangKey("f3hud.config.modules.showDetailedChunks")
+        public boolean showDetailedChunks = false;
+
+        @Config.LangKey("f3hud.config.modules.showTargetedBlock")
+        public boolean showTargetedBlock = false;
+
+        @Config.LangKey("f3hud.config.modules.showEntityStats")
+        public boolean showEntityStats = false;
+
+        @Config.Comment("Fixt Compiler Error in EntitiesModule")
+        public boolean showEntities = true;
+
+        @Config.LangKey("f3hud.config.modules.showPerformanceGraph")
+        public boolean showPerformanceGraph = false;
+
+        @Config.LangKey("f3hud.config.modules.showSystem")
+        public boolean showSystem = true;
+
+        @Config.LangKey("f3hud.config.modules.showServer")
+        public boolean showServer = true;
+
+        @Config.LangKey("f3hud.config.modules.showTravelModule")
+        public boolean showTravelModule = true;
+
+        @Config.LangKey("f3hud.config.modules.showHealthBars")
+        public boolean showHealthBars = false;
+
+        @Config.Comment("Show notifications in chat when toggling modules")
+        public boolean showChatMessages = true;
+
+        // Mod-Support (Standardized)
         @Config.LangKey("f3hud.config.modules.showAstral")
         public boolean showAstral = true;
 
+        @Config.Comment("Fixt Compiler Error in AstralModule")
+        public boolean showAstralSorcery = true;
+
         @Config.LangKey("f3hud.config.modules.showStellar")
-        public boolean showStellarSky = true;
+        public boolean showStellar = true;
 
         @Config.LangKey("f3hud.config.modules.showBotania")
-        public boolean showBotaniaMod = true;
+        public boolean showBotania = true;
 
         @Config.LangKey("f3hud.config.modules.showBloodMagic")
         public boolean showBloodMagic = true;
 
         @Config.LangKey("f3hud.config.modules.showThaumcraft")
         public boolean showThaumcraft = true;
+
+        @Config.LangKey("f3hud.config.modules.showEnd")
+        public boolean showEnd = true;
     }
 
     public static class Colors {
         @Config.LangKey("f3hud.config.colors.colorFPS") public int colorFPS = 0xAAFF55;
-        @Config.LangKey("f3hud.config.colors.colorX") public int colorX = 0xFF4444;
-        @Config.LangKey("f3hud.config.colors.colorY") public int colorY = 0x44FF44;
-        @Config.LangKey("f3hud.config.colors.colorZ") public int colorZ = 0x55AAFF;
+        @Config.LangKey("f3hud.config.colors.colorX") public int colorX = 0xF0F0F0;
+        @Config.LangKey("f3hud.config.colors.colorY") public int colorY = 0xF0F0F0;
+        @Config.LangKey("f3hud.config.colors.colorZ") public int colorZ = 0xF0F0F0;
         @Config.LangKey("f3hud.config.colors.colorChunk") public int colorChunk = 0x55FFFF;
         @Config.LangKey("f3hud.config.colors.colorBlock") public int colorBlock = 0xFF55FF;
         @Config.LangKey("f3hud.config.colors.colorLight") public int colorLight = 0xFFEE55;
@@ -211,58 +337,22 @@ public class ModConfig {
     }
 
     public static class Position {
-        @Config.LangKey("f3hud.config.position.userScale")
-        @Config.Comment("The overall scale of the HUD text (Default: 0.8)")
-        @Config.RangeDouble(min = 0.1, max = 2.0)
         public double userScale = 0.8;
-
-        @Config.LangKey("f3hud.config.position.leftX")
-        @Config.Comment("Horizontal margin for the left side (Default: 8)")
         public int leftX = 8;
-
-        @Config.LangKey("f3hud.config.position.leftY")
-        @Config.Comment("Vertical margin for the left side (Default: 8)")
         public int leftY = 8;
-
-        @Config.LangKey("f3hud.config.position.rightX")
-        @Config.Comment("Horizontal margin for the right side (Default: 8)")
         public int rightX = 8;
-
-        @Config.LangKey("f3hud.config.position.rightY")
-        @Config.Comment("Vertical margin for the right side (Default: 8)")
         public int rightY = 8;
-
-        @Config.Comment("Vertical offset for the Compass (Default: 40 to avoid overlap with TAN)")
         public int compassYOffset = 40;
     }
 
     public static class Animation {
-        @Config.LangKey("f3hud.config.animation.enableAnimation")
-        @Config.Comment("Enable sliding animations for HUD elements")
         public boolean enableAnimation = true;
-
-        @Config.LangKey("f3hud.config.animation.animationSpeed")
-        @Config.RangeDouble(min = 0.01, max = 1.0)
         public double animationSpeed = 0.1;
-
-        @Config.LangKey("f3hud.config.animation.slideDistance")
-        @Config.Comment("Distance for the sliding animation")
         public int slideDistance = 50;
-
-        @Config.LangKey("f3hud.config.animation.backgroundAlpha")
-        @Config.Comment("Alpha for Compass & Graph background (0-255)")
-        @Config.RangeInt(min = 0, max = 255)
         public int backgroundAlpha = 100;
-
-        @Config.Comment("Show a background box behind text modules")
         public boolean showTextBackground = true;
-
-        @Config.Comment("Transparency of the text background (0-255)")
-        @Config.RangeInt(min = 0, max = 255)
         public int textBackgroundAlpha = 100;
-
-        @Config.Comment("Color of the text background (Hex, e.g. 0x000000 for black)")
-        public String textBackgroundColor = "0x000000";
+        public int textBackgroundColor = 0x000000;
     }
 
     @Mod.EventBusSubscriber(modid = "betterf3reborn")

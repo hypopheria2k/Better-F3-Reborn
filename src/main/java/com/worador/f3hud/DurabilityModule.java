@@ -5,9 +5,10 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.TextFormatting;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class DurabilityModule extends InfoModule {
-    private static final int UPDATE_INTERVAL_TICKS = 5;
+    private static final int UPDATE_INTERVAL_TICKS = 10; // 0.5 Sek reicht völlig
     private int lastUpdateTick = -1;
     private List<InfoLine> cachedLines = new ArrayList<>();
 
@@ -23,22 +24,26 @@ public class DurabilityModule extends InfoModule {
 
         int currentTick = mc.player.ticksExisted;
         if (cachedLines.isEmpty() || (currentTick - lastUpdateTick) >= UPDATE_INTERVAL_TICKS) {
-            cachedLines = new ArrayList<>();
+            List<InfoLine> newLines = new ArrayList<>();
 
-            // 1. Hands (Main & Off)
-            addDurabilityLine(cachedLines, mc.player.getHeldItemMainhand(), "Main: ");
-            addDurabilityLine(cachedLines, mc.player.getHeldItemOffhand(), "Off: ");
+            // 1. Werkzeuge in den Händen
+            addDurabilityLine(newLines, mc.player.getHeldItemMainhand(), "Main: ");
+            addDurabilityLine(newLines, mc.player.getHeldItemOffhand(), "Off: ");
 
-            // 2. Armor (Iteriere sicher durch alle 4 Slots)
+            // 2. Rüstung (Sicherer Zugriff über die Inventory-Klasse)
             NonNullList<ItemStack> armor = mc.player.inventory.armorInventory;
-            String[] armorNames = {"Boots", "Legs", "Chest", "Helm"};
-
             for (int i = 3; i >= 0; i--) {
                 ItemStack stack = armor.get(i);
-                if (!stack.isEmpty()) {
-                    addDurabilityLine(cachedLines, stack, armorNames[i] + ": ");
+                if (!stack.isEmpty() && stack.isItemStackDamageable()) {
+                    // Nutzt den kurzen Namen des Items (z.B. "Diamond Helmet")
+                    String shortName = stack.getItem().getItemStackDisplayName(stack);
+                    if (shortName.contains(" ")) {
+                        shortName = shortName.substring(shortName.lastIndexOf(" ") + 1);
+                    }
+                    addDurabilityLine(newLines, stack, shortName + ": ");
                 }
             }
+            cachedLines = newLines;
             lastUpdateTick = currentTick;
         }
         return cachedLines;
@@ -50,35 +55,21 @@ public class DurabilityModule extends InfoModule {
             int currentDur = maxDur - stack.getItemDamage();
             double percent = (currentDur * 100.0) / maxDur;
 
-            // FIX: Wir zeigen IMMER alles an, wenn das Modul an ist.
-            // Das "Ausblenden bei > 90%" war der Grund für den verschwundenen Helm.
-
-            int color = 0x55FF55; // GRÜN
+            // Dynamische Farbwahl basierend auf Zustand
+            int color = 0x55FF55; // Grün (Standard)
             String style = "";
 
-            if (percent <= 15.0) {
-                color = 0xFF5555; // ROT
+            if (percent <= 20.0) {
+                color = 0xFF5555; // Rot (Kritisch)
                 style = TextFormatting.BOLD.toString();
-            } else if (percent <= 40.0) {
-                color = 0xFFAA00; // GOLD
-            } else if (percent <= 75.0) {
-                color = 0xFFFF55; // GELB
+            } else if (percent <= 50.0) {
+                color = 0xFFFF55; // Gelb (Abgenutzt)
             }
 
-            String bar = getDurabilityBar(percent);
-            String info = String.format("%s %d/%d (%.0f%%)", bar, currentDur, maxDur, percent);
+            // KEINE BALKEN (|||) - Nur klare Zahlen und Prozent
+            // Format: "450 / 1561 (28%)"
+            String info = String.format(Locale.US, "%d / %d (%d%%)", currentDur, maxDur, (int)percent);
             lines.add(new InfoLine(style + prefix, info, color));
         }
-    }
-
-    private String getDurabilityBar(double percent) {
-        int barLength = 5;
-        int filled = (int) Math.round(percent / 20.0);
-        StringBuilder sb = new StringBuilder("[");
-        for (int i = 0; i < barLength; i++) {
-            sb.append(i < filled ? "|" : ".");
-        }
-        sb.append("]");
-        return sb.toString();
     }
 }

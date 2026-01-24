@@ -3,12 +3,9 @@ package com.worador.f3hud;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.*;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.util.text.TextFormatting;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -16,132 +13,57 @@ import java.util.Locale;
 public class EntityStatsModule extends InfoModule {
 
     @Override
-    public String getName() {
-        return "EntityStats";
-    }
+    public String getName() { return "EntityStats"; }
 
     @Override
-    protected boolean isEnabledInConfig() {
-        return ModConfig.modules.showEntityStats;
-    }
+    protected boolean isEnabledInConfig() { return ModConfig.modules.showEntityStats; }
 
     @Override
     public List<InfoLine> getLines() {
         List<InfoLine> lines = new ArrayList<>();
-        if (mc.player == null || mc.world == null) return lines;
+        if (!isEnabledInConfig() || mc.player == null) return lines;
 
-        // 1. Reittier-Check: Zeige immer Stats des Reittiers, wenn man reitet
-        Entity ridingEntity = mc.player.getRidingEntity();
-        if (ridingEntity != null) {
-            return getEntityStats(ridingEntity, "Mount");
-        }
+        // 1. Priorität: Reittier | 2. Priorität: Angeschautes Ziel
+        Entity target = (mc.player.getRidingEntity() != null) ? mc.player.getRidingEntity() : getTargetEntity();
 
-        // 2. Target-Check: Zeige Stats des angesehenen Entities
-        Entity target = getTargetEntity();
-        if (target != null) {
-            return getEntityStats(target, "Entity");
-        }
-
-        return lines;
-    }
-    
-    private List<InfoLine> getEntityStats(Entity target, String prefix) {
-        List<InfoLine> lines = new ArrayList<>();
-        
-        // 1. Allgemeine Entity-Info (für alle Entities)
-        String entityType = getEntityTypeName(target);
-        lines.add(new InfoLine(prefix + ": ", entityType, 0xAAAAAA));
-
-        // 2. Health-Anzeige (für alle lebenden Entities)
         if (target instanceof EntityLivingBase) {
             EntityLivingBase living = (EntityLivingBase) target;
+            String type = target.getName();
+
+            // HP Anzeige: Klar und ohne Balken-Müll
             float hp = living.getHealth();
-            float maxHp = living.getMaxHealth();
-            String hpText = String.format(Locale.US, "%.1f/%.1f", hp, maxHp);
-            
-            // Health-Bar nur anzeigen, wenn showHealthBars aktiviert ist
-            if (ModConfig.modules.showHealthBars) {
-                hpText += " " + getProgressBar(hp/maxHp * 100);
-            }
-            
-            lines.add(new InfoLine("HP: ", hpText, 0xFF5555));
-        }
+            float max = living.getMaxHealth();
+            int hColor = (hp <= max * 0.25) ? 0xFF5555 : 0x55FF55;
+            lines.add(new InfoLine(type + " HP: ", String.format(Locale.US, "%.1f/%.1f", hp, max), hColor));
 
-        // 3. Pferde-spezifische Statistiken (nur für Pferde)
-        if (target instanceof AbstractHorse) {
-            AbstractHorse horse = (AbstractHorse) target;
+            // Pferde-Spezial-Stats (Speed & Jump)
+            if (target instanceof AbstractHorse) {
+                AbstractHorse horse = (AbstractHorse) target;
 
-            // 3a. Speed-Analyse (Vanilla Max ist ca. 14.5 m/s)
-            IAttributeInstance speedAttr = horse.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
-            double speedmS = (speedAttr != null ? speedAttr.getAttributeValue() : 0.0) * 43.17; // Korrigierter Faktor für 1.12.2
-            int speedColor = 0x55FFFF;
-            String speedRating = "";
+                // Speed in m/s (Standard Minecraft Faktor 43.17)
+                double speed = horse.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() * 43.17;
+                int sColor = (speed > 13.0) ? 0xFFAA00 : 0xFFFFFF; // Gold für Top-Pferde
+                lines.add(new InfoLine("Speed: ", String.format(Locale.US, "%.2f m/s", speed), sColor));
 
-            if (speedmS > 13.0) { speedColor = 0xFFAA00; speedRating = " [TOP]"; }
-            else if (speedmS > 10.0) { speedColor = 0x55FF55; }
+                // Sprunghöhe (Vereinfacht für Performance)
+                double jumpStr = horse.getHorseJumpStrength();
+                double jumpHeight = 5.275 * Math.pow(jumpStr, 2); // Sehr genaue Annäherung für 1.12.2
+                int jColor = (jumpHeight > 4.5) ? 0xFFAA00 : 0xFFFFFF;
+                lines.add(new InfoLine("Jump: ", String.format(Locale.US, "%.1f Blocks", jumpHeight), jColor));
 
-            lines.add(new InfoLine("Speed: ", String.format(Locale.US, "%.2f m/s%s", speedmS, speedRating), speedColor));
-
-            // 3b. Jump-Analyse (Vanilla Max ist ca. 5.5 Blöcke)
-            double jumpStr = horse.getHorseJumpStrength();
-            // Deine bewährte Formel
-            double jumpHeight = -0.181758 * Math.pow(jumpStr, 3) + 3.68971 * Math.pow(jumpStr, 2) + 2.12859 * jumpStr - 0.34393;
-            int jumpColor = 0xFFFF55;
-            if (jumpHeight > 4.5) jumpColor = 0xFFAA00;
-
-            lines.add(new InfoLine("Jump: ", String.format(Locale.US, "%.2f Blocks", Math.max(0, jumpHeight)), jumpColor));
-
-            // 3c. Zucht-Status (Wichtiges Zusatz-Feature)
-            if (horse instanceof EntityHorse || horse instanceof EntityDonkey || horse instanceof EntityMule) {
-                boolean isReproducing = horse.isInLove();
-                boolean isTame = horse.isTame();
-                String status = isTame ? (isReproducing ? "Ready to Breed" : "Tame") : TextFormatting.RED + "Wild";
-                lines.add(new InfoLine("Status: ", status, isTame ? 0x55FF55 : 0xFF5555));
+                // Status (Zähmung)
+                if (!horse.isTame()) {
+                    lines.add(new InfoLine("Status: ", "WILD", 0xFF5555));
+                }
             }
         }
-
         return lines;
-    }
-
-    private String getProgressBar(float percent) {
-        int barLength = 5;
-        int filled = Math.round(percent / 20);
-        StringBuilder sb = new StringBuilder("[");
-        for (int i = 0; i < barLength; i++) {
-            sb.append(i < filled ? "|" : ".");
-        }
-        sb.append("]");
-        return sb.toString();
     }
 
     private Entity getTargetEntity() {
-        if (mc.player.getRidingEntity() != null) return mc.player.getRidingEntity();
-        if (mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY) return mc.objectMouseOver.entityHit;
+        if (mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY) {
+            return mc.objectMouseOver.entityHit;
+        }
         return null;
-    }
-
-    private String getEntityTypeName(Entity entity) {
-        if (entity instanceof AbstractHorse) {
-            AbstractHorse horse = (AbstractHorse) entity;
-            if (horse instanceof EntityHorse) return "Horse";
-            if (horse instanceof EntityDonkey) return "Donkey";
-            if (horse instanceof EntityMule) return "Mule";
-            if (horse instanceof EntityLlama) return "Llama";
-            if (horse instanceof EntitySkeletonHorse) return "Skeleton Horse";
-            if (horse instanceof EntityZombieHorse) return "Zombie Horse";
-            return "Equine";
-        }
-        
-        // Allgemeine Entity-Typen
-        if (entity instanceof EntityLivingBase) {
-            EntityLivingBase living = (EntityLivingBase) entity;
-            if (living instanceof EntityPlayer) return "Player";
-            if (living instanceof EntityMob) return "Mob";
-            if (living instanceof EntityAnimal) return "Animal";
-            if (living instanceof EntityVillager) return "Villager";
-            return "Living Entity";
-        }
-        
-        return entity.getName();
     }
 }

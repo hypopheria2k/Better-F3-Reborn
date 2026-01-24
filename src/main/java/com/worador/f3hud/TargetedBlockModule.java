@@ -14,86 +14,94 @@ import java.util.Map;
 
 public class TargetedBlockModule extends InfoModule {
 
-    @Override
-    public String getName() {
-        return "Targeted Block";
-    }
-
-    @Override
-    protected boolean isEnabledInConfig() {
-        return ModConfig.modules.showTargetedBlock;
-    }
+    @Override public String getName() { return "Targeted Block"; }
+    @Override protected boolean isEnabledInConfig() { return ModConfig.modules.showTargetedBlock; }
 
     @Override
     public List<InfoLine> getLines() {
         List<InfoLine> lines = new ArrayList<>();
-        if (mc.player == null || mc.world == null) return lines;
+        if (!isEnabledInConfig() || mc.player == null || mc.world == null) return lines;
 
-        RayTraceResult rayTrace = mc.objectMouseOver;
-
-        // 1. Item Despawn Timer (Wenn man ein Item anschaut)
-        if (rayTrace != null && rayTrace.typeOfHit == RayTraceResult.Type.ENTITY && rayTrace.entityHit instanceof EntityItem) {
-            EntityItem entityItem = (EntityItem) rayTrace.entityHit;
-
-            // 'age' ist private in EntityItem. Wir nutzen ReflectionHelper von Forge.
-            // Die Obfuscated-Namen für 1.12.2 sind "field_70292_b" oder einfach "age"
-            int age = ReflectionHelper.getPrivateValue(EntityItem.class, entityItem, "field_70292_b", "age");
-
-            int remainingTicks = 6000 - age;
-            int seconds = Math.max(0, remainingTicks / 20);
-            lines.add(new InfoLine("Despawn in: ", seconds + "s", 0xFFAA00));
+        RayTraceResult rt = mc.objectMouseOver;
+        if (rt == null || rt.typeOfHit == RayTraceResult.Type.MISS) {
+            lines.add(new InfoLine("Targeted: ", "None", 0x555555));
+            return lines;
         }
 
-        // 2. Block Informationen
-        if (rayTrace != null && rayTrace.typeOfHit == RayTraceResult.Type.BLOCK) {
-            BlockPos pos = rayTrace.getBlockPos();
+        // 1. Entity Check (Items)
+        if (rt.typeOfHit == RayTraceResult.Type.ENTITY && rt.entityHit instanceof EntityItem) {
+            EntityItem item = (EntityItem) rt.entityHit;
+            // Nutzt Obfuscated Name für 1.12.2 (age)
+            int age = ReflectionHelper.getPrivateValue(EntityItem.class, item, "field_70292_b", "age");
+            int remaining = Math.max(0, (6000 - age) / 20);
+            lines.add(new InfoLine("Despawn in: ", remaining + "s", 0xFFAA00));
+            lines.add(new InfoLine("Item: ", item.getItem().getDisplayName(), 0xFFFFFF));
+        }
+
+        // 2. Block Check
+        if (rt.typeOfHit == RayTraceResult.Type.BLOCK) {
+            BlockPos pos = rt.getBlockPos();
             IBlockState state = mc.world.getBlockState(pos);
             Block block = state.getBlock();
 
-            // Position
-            lines.add(new InfoLine("Looking at: ", String.format("%d, %d, %d", pos.getX(), pos.getY(), pos.getZ()), ModConfig.colors.colorChunk));
+            lines.add(new InfoLine("Block: ", Block.REGISTRY.getNameForObject(block).toString(), 0xFFFFFF));
+            lines.add(new InfoLine("At: ", pos.getX() + ", " + pos.getY() + ", " + pos.getZ(), 0xAAAAAA));
 
-            // Block Name & ID
-            String blockId = Block.REGISTRY.getNameForObject(block).toString();
-            lines.add(new InfoLine("Block: ", blockId, 0xFFFFFF));
-
-            // Block States (Properties)
+            // Properties & Growth
             for (Map.Entry<IProperty<?>, Comparable<?>> entry : state.getProperties().entrySet()) {
-                String propertyName = entry.getKey().getName();
-                String valueName = entry.getValue().toString();
-                lines.add(new InfoLine("  " + propertyName + ": ", valueName, 0xAAAAAA));
+                String name = entry.getKey().getName();
+                String value = entry.getValue().toString();
+
+                if ("age".equals(name) && entry.getValue() instanceof Integer) {
+                    int curAge = (Integer) entry.getValue();
+                    Integer maxAge = getMaxAgeForBlock(block);
+                    if (maxAge != null) {
+                        String info = curAge + "/" + maxAge;
+                        if (curAge < maxAge) {
+                            // Schätzung: 1.12.2 Durchschnitt ca. 5 Min pro Stufe bei Weizen/etc.
+                            int minLeft = (maxAge - curAge) * 5;
+                            info += " (~" + minLeft + "m left)";
+                        }
+                        lines.add(new InfoLine("Growth: ", info, 0x55FF55));
+                        continue;
+                    }
+                }
+                lines.add(new InfoLine("  " + name + ": ", value, 0x888888));
             }
 
-            // Enchantment Power (Bücherregal-Check)
+            // Bookshelves für Enchanting Table
             if (block == Blocks.ENCHANTING_TABLE) {
-                int bookshelfCount = countBookshelves(mc.world, pos);
-                int color = (bookshelfCount >= 15) ? 0x55FF55 : 0xFFAA00;
-                lines.add(new InfoLine("Bookshelves: ", bookshelfCount + "/15", color));
+                int shelves = countBookshelves(pos);
+                lines.add(new InfoLine("Bookshelves: ", shelves + "/15", shelves >= 15 ? 0x55FF55 : 0xFFAA00));
             }
-
-        } else if (lines.isEmpty()) {
-            lines.add(new InfoLine("Targeted: ", "None", 0x555555));
         }
 
         return lines;
     }
 
-    private int countBookshelves(net.minecraft.world.World world, BlockPos tablePos) {
+    private int countBookshelves(BlockPos tablePos) {
         int count = 0;
-        // Scannt den Standard-Bereich für den Zaubertisch (1 Block Abstand, 2 hoch)
-        for (int x = -1; x <= 1; ++x) {
-            for (int z = -1; z <= 1; ++z) {
-                if ((x != 0 || z != 0) && world.isAirBlock(tablePos.add(x, 0, z)) && world.isAirBlock(tablePos.add(x, 1, z))) {
-                    for (int y = 0; y <= 1; ++y) {
-                        if (world.getBlockState(tablePos.add(x * 2, y, z * 2)).getBlock() == Blocks.BOOKSHELF) count++;
-                        if (x != 0 && z != 0) {
-                            if (world.getBlockState(tablePos.add(x * 2, y, z)).getBlock() == Blocks.BOOKSHELF) count++;
-                            if (world.getBlockState(tablePos.add(x, y, z * 2)).getBlock() == Blocks.BOOKSHELF) count++;
+        for (int zi = -1; zi <= 1; ++zi) {
+            for (int xi = -1; xi <= 1; ++xi) {
+                if ((zi != 0 || xi != 0) && mc.world.isAirBlock(tablePos.add(xi, 0, zi)) && mc.world.isAirBlock(tablePos.add(xi, 1, zi))) {
+                    for (int yi = 0; yi <= 1; ++yi) {
+                        if (mc.world.getBlockState(tablePos.add(xi * 2, yi, zi * 2)).getBlock() == Blocks.BOOKSHELF) count++;
+                        if (xi != 0 && zi != 0) {
+                            if (mc.world.getBlockState(tablePos.add(xi * 2, yi, zi)).getBlock() == Blocks.BOOKSHELF) count++;
+                            if (mc.world.getBlockState(tablePos.add(xi, yi, zi * 2)).getBlock() == Blocks.BOOKSHELF) count++;
                         }
                     }
                 }
             }
         }
         return count;
+    }
+
+    private Integer getMaxAgeForBlock(Block block) {
+        if (block instanceof net.minecraft.block.BlockCrops) return ((net.minecraft.block.BlockCrops)block).getMaxAge();
+        if (block == Blocks.NETHER_WART) return 3;
+        if (block == Blocks.COCOA) return 2;
+        if (block == Blocks.CACTUS || block == Blocks.REEDS) return 15;
+        return null;
     }
 }

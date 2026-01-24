@@ -7,6 +7,7 @@ import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.passive.EntityAmbientCreature;
+import net.minecraft.util.math.RayTraceResult;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,15 +38,20 @@ public class EntitiesModule extends InfoModule {
 
         int monsters = 0, animals = 0, water = 0, ambient = 0, items = 0, xp = 0, others = 0;
 
-        // Effizientes Durchlaufen der geladenen Entities
+        // Effizientes Durchlaufen der geladenen Entities mit sicherer Prüfung
         for (Entity e : mc.world.loadedEntityList) {
-            if (e instanceof IMob) monsters++;
-            else if (e instanceof EntityAnimal) animals++;
-            else if (e instanceof EntityWaterMob) water++;
-            else if (e instanceof EntityAmbientCreature) ambient++;
-            else if (e instanceof EntityItem) items++;
-            else if (e instanceof EntityXPOrb) xp++;
-            else others++;
+            try {
+                if (e instanceof IMob) monsters++;
+                else if (e instanceof EntityAnimal) animals++;
+                else if (e instanceof EntityWaterMob) water++;
+                else if (e instanceof EntityAmbientCreature) ambient++;
+                else if (e instanceof EntityItem) items++;
+                else if (e instanceof EntityXPOrb) xp++;
+                else others++;
+            } catch (Exception ex) {
+                // Sicherer Fallback für inkompatible Entities
+                others++;
+            }
         }
 
         // 2. Mob-Cap Analyse (Vanilla 1.12.2 Hostile Cap ist meist 70)
@@ -66,6 +72,42 @@ public class EntitiesModule extends InfoModule {
         // 5. Andere (Rahmen, Boote, etc.)
         if (others > 0) {
             lines.add(new InfoLine("Misc: ", String.valueOf(others), 0x777777));
+        }
+
+        // 6. Baby Mobs Timer (Wenn man ein Baby-Tier anschaut)
+        if (mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == net.minecraft.util.math.RayTraceResult.Type.ENTITY) {
+            Entity targetEntity = mc.objectMouseOver.entityHit;
+            
+            try {
+                // Check if entity has getGrowingAge method using reflection
+                if (targetEntity != null) {
+                    try {
+                        java.lang.reflect.Method getGrowingAgeMethod = targetEntity.getClass().getMethod("getGrowingAge");
+                        Integer growingAge = (Integer) getGrowingAgeMethod.invoke(targetEntity);
+                        
+                        if (growingAge != null && growingAge < 0) {
+                            // Baby mob - calculate time until adult
+                            int ticksUntilAdult = Math.abs(growingAge);
+                            int secondsUntilAdult = ticksUntilAdult / 20;
+                            
+                            String timeInfo;
+                            if (secondsUntilAdult < 60) {
+                                timeInfo = secondsUntilAdult + "s";
+                            } else {
+                                int minutes = secondsUntilAdult / 60;
+                                int seconds = secondsUntilAdult % 60;
+                                timeInfo = String.format("%dm %ds", minutes, seconds);
+                            }
+                            
+                            lines.add(new InfoLine("Baby Age: ", timeInfo + " until adult", 0x55FFFF));
+                        }
+                    } catch (Exception reflectionEx) {
+                        // Entity doesn't have getGrowingAge method, skip
+                    }
+                }
+            } catch (Exception e) {
+                // Safe fallback for incompatible entities
+            }
         }
 
         return lines;

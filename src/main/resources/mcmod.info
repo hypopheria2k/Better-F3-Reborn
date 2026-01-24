@@ -1,14 +1,14 @@
 [
   {
-    "modid": "f3hud",
-    "name": "Better F3 Reloaded",
-    "description": "A highly customizable and animated F3 HUD replacement.",
-    "version": "2.2.0-Beta2",
+    "modid": "betterf3reborn",
+    "name": "Better F3 Reloaded (TAF3-Core)",
+    "description": "A highly optimized and animated F3-HUD. Designed to eliminate redundant information and provide high-performance modules for survival and technical gameplay. Features advanced tick-caching and minimal CPU overhead.",
+    "version": "2.2.0-Beta3",
     "mcversion": "1.12.2",
     "url": "",
     "updateUrl": "",
     "authorList": ["worador"],
-    "credits": "Original BetterF3 ideas, rewritten for 1.12.2",
+    "credits": "Inspired by BetterF3, fully rewritten and performance-tuned for modern hardware and Linux/Mesa systems.",
     "logoFile": "logo.png",
     "screenshots": [],
     "dependencies": []

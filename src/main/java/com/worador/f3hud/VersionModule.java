@@ -6,38 +6,31 @@ import java.util.List;
 
 public class VersionModule extends InfoModule {
 
-    @Override
-    public String getName() {
-        return "Version Info";
+    private final List<InfoLine> cachedLines = new ArrayList<>();
+
+    public VersionModule() {
+        // Wir berechnen die Zeilen nur EINMAL beim Erstellen des Moduls
+        String versionLabel = TextFormatting.GRAY + "[" + TextFormatting.WHITE + "v" + TextFormatting.GRAY + "] ";
+        String versionValue = TextFormatting.GREEN + "2.2.0 " + TextFormatting.GRAY + "| " + TextFormatting.AQUA + "Beta3";
+        cachedLines.add(new InfoLine(versionLabel, versionValue, 0xFFFFFF)); // Weiß, da String-Formatierung intern regelt
+
+        String warningLabel = TextFormatting.RED + "[!] " + TextFormatting.WHITE + "Notice: ";
+        String warningText = TextFormatting.RED + "BETA " + TextFormatting.GRAY + "- " + "May contain bugs";
+        cachedLines.add(new InfoLine(warningLabel, warningText, 0xFFFFFF));
     }
 
-    @Override
-    protected boolean isEnabledInConfig() {
-        return ModConfig.modules.showVersion;
-    }
+    @Override public String getName() { return "Version Info"; }
+    @Override protected boolean isEnabledInConfig() { return ModConfig.modules.showVersion; }
 
     @Override
     public List<InfoLine> getLines() {
-        List<InfoLine> lines = new ArrayList<>();
-        if (mc.player == null || mc.world == null) return lines;
-
-        // 1. Build-Zeile: [Version] 2.2.0 | Beta1
-        // Label in Grau, Nummer in Grün (0x55FF55), Status in Cyan (0x55FFFF)
-        String versionLabel = TextFormatting.GRAY + "[" + TextFormatting.WHITE + "v" + TextFormatting.GRAY + "] ";
-        String versionValue = TextFormatting.GREEN + "2.2.0 " + TextFormatting.GRAY + "| " + TextFormatting.AQUA + "Beta2";
-        lines.add(new InfoLine(versionLabel, versionValue, 0x55FF55));
-
-        // 2. Warn-Zeile: [!] Notice: May contain bugs
-        // Icon in Rot (0xFF5555), Text in hellem Rot/Rosa
-        String warningLabel = TextFormatting.RED + "[!] " + TextFormatting.WHITE + "Notice: ";
-        String warningText = TextFormatting.RED + "BETA " + TextFormatting.GRAY + "- " + "May contain (heavy)bugs";
-        lines.add(new InfoLine(warningLabel, warningText, 0xFF5555));
-
-        return lines;
+        // Minimalster CPU-Overhead: Nur die fertige Liste zurückgeben
+        return isEnabledInConfig() ? cachedLines : new ArrayList<>();
     }
 
     @Override
     public int getHeight() {
-        return 11 * 2 + 2;
+        // 2 Zeilen à 9 Pixel + 2 Pixel Abstand
+        return (9 * 2) + 2;
     }
 }

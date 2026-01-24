@@ -17,7 +17,7 @@ public class PotionModule extends InfoModule {
 
     @Override
     protected boolean isEnabledInConfig() {
-        return ModConfig.modules.showPotions;
+        return ModConfig.modules.showPotion;
     }
 
     @Override
@@ -32,37 +32,39 @@ public class PotionModule extends InfoModule {
             Potion potion = effect.getPotion();
             int durationTicks = effect.getDuration();
 
-            // Name lokalisieren
+            // Name lokalisieren & Level hinzufügen
             String name = I18n.format(potion.getName());
-
-            // Level (z.B. II)
             if (effect.getAmplifier() > 0) {
-                name += " " + I18n.format("enchantment.level." + (effect.getAmplifier() + 1));
+                name += " " + (effect.getAmplifier() + 1); // Einfache Zahlen sind im HUD cleaner als Römisch
             }
 
-            // Dauer String
-            String durationStr = Potion.getPotionDurationString(effect, 1.0F);
+            // Dauer formatieren: M:SS
+            String durationStr = formatDuration(durationTicks);
+            if (effect.getIsAmbient()) durationStr = "Amb"; // Für Beacon/Ambient Effekte kürzen
 
-            // --- AUFWERTUNG: Dynamische Warnung ---
+            // Farbe optimieren: LiquidColor ist oft zu dunkel
             int color = potion.getLiquidColor();
+            if (color == 0) color = 0xFFFFFF; // Fallback für unsichtbare Farben
 
-            // Wenn der Effekt weniger als 10 Sekunden (200 Ticks) läuft, lassen wir ihn blinken
-            if (durationTicks < 200) {
-                // Simples Blinken basierend auf der Systemzeit
-                if ((System.currentTimeMillis() / 500) % 2 == 0) {
-                    color = 0xFF5555; // Wechselt zu hellem Rot
-                }
+            // Blinken bei weniger als 10 Sekunden
+            if (durationTicks < 200 && (mc.world.getTotalWorldTime() % 20 < 10)) {
+                color = 0xFF5555; // Rot-Warnung
             }
 
-            // Markierung für schädliche Effekte (Deutsches Verhalten: Klare Ansage)
-            String prefix = "";
-            if (potion.isBadEffect()) {
-                prefix = TextFormatting.RED + "[!] " + TextFormatting.RESET;
-            }
+            // Markierung für schädliche Effekte
+            String prefix = potion.isBadEffect() ? TextFormatting.RED + "!" + TextFormatting.RESET + " " : "";
 
             lines.add(new InfoLine(prefix + name + ": ", durationStr, color));
         }
 
         return lines;
+    }
+
+    private String formatDuration(int ticks) {
+        if (ticks > 32000) return "**:**"; // Unendliche Effekte
+        int seconds = ticks / 20;
+        int m = seconds / 60;
+        int s = seconds % 60;
+        return String.format("%d:%02d", m, s);
     }
 }

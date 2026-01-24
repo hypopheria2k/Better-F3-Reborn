@@ -1,6 +1,5 @@
 package com.worador.f3hud;
 
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,111 +7,91 @@ import java.util.Locale;
 import java.util.Random;
 
 public class SlimeChunkModule extends InfoModule {
+    private long lastUpdateTick = -1;
+    private List<InfoLine> cachedLines = new ArrayList<>();
+    private final Random slimeRand = new Random();
 
-    @Override
-    public String getName() {
-        return "Slime Chunk Proximity";
-    }
-
-    @Override
-    protected boolean isEnabledInConfig() {
-        return ModConfig.modules.showSlimeDistance;
-    }
+    @Override public String getName() { return "Slime Chunk"; }
+    @Override protected boolean isEnabledInConfig() { return ModConfig.modules.showSlimeChunk; }
 
     @Override
     public List<InfoLine> getLines() {
+        if (!isEnabledInConfig() || mc.player == null || mc.world == null) return new ArrayList<>();
+
+        // Slimes spawnen nur in der Overworld (Dimension 0)
+        if (mc.world.provider.getDimension() != 0) return new ArrayList<>();
+
+        // Tick-Caching
+        if (mc.player.ticksExisted - lastUpdateTick < 10 && !cachedLines.isEmpty()) {
+            return cachedLines;
+        }
+
         List<InfoLine> lines = new ArrayList<>();
-        if (mc.player == null || mc.world == null) return lines;
-
-        // Die Slime-Berechnung funktioniert nur in der Overworld korrekt
-        if (mc.world.provider.getDimension() != 0) return lines;
-
         long seed = mc.world.getSeed();
-        int currentChunkX = mc.player.chunkCoordX;
-        int currentChunkZ = mc.player.chunkCoordZ;
+        int chunkX = mc.player.chunkCoordX;
+        int chunkZ = mc.player.chunkCoordZ;
 
-        boolean isCurrentSlime = isSlimeChunk(seed, currentChunkX, currentChunkZ);
+        if (isSlimeChunk(seed, chunkX, chunkZ)) {
+            // NUTZT JETZT DIE FARBE AUS DER CONFIG
+            lines.add(new InfoLine("Slime Chunk: ", "YES (Y < 40)", ModConfig.colors.colorSlimeChunk));
+        } else {
+            // Suche im 5x5 Radius
+            double minDistanceSq = Double.MAX_VALUE;
+            int foundX = 0, foundZ = 0;
 
-        double minDistance = Double.MAX_VALUE;
-        double targetX = 0, targetZ = 0;
-        int radius = 6; // Radius leicht erhöht für bessere Abdeckung
+            for (int x = -5; x <= 5; x++) {
+                for (int z = -5; z <= 5; z++) {
+                    if (isSlimeChunk(seed, chunkX + x, chunkZ + z)) {
+                        double tX = ((chunkX + x) << 4) + 8;
+                        double tZ = ((chunkZ + z) << 4) + 8;
+                        double distSq = mc.player.getDistanceSq(tX, mc.player.posY, tZ);
 
-        for (int x = -radius; x <= radius; x++) {
-            for (int z = -radius; z <= radius; z++) {
-                if (isSlimeChunk(seed, currentChunkX + x, currentChunkZ + z)) {
-                    double centerX = ((currentChunkX + x) << 4) + 8.5;
-                    double centerZ = ((currentChunkZ + z) << 4) + 8.5;
-
-                    double dist = mc.player.getDistance(centerX, mc.player.posY, centerZ);
-                    if (dist < minDistance) {
-                        minDistance = dist;
-                        targetX = centerX;
-                        targetZ = centerZ;
+                        if (distSq < minDistanceSq) {
+                            minDistanceSq = distSq;
+                            foundX = (int) tX;
+                            foundZ = (int) tZ;
+                        }
                     }
                 }
             }
-        }
 
-        // 1. Status: Aktueller Chunk mit detailliertem Höhen-Check
-        if (isCurrentSlime) {
-            String yStatus;
-            int slimeColor;
+            if (minDistanceSq != Double.MAX_VALUE) {
+                double actualDist = Math.sqrt(minDistanceSq);
+                String dir = getRelativeDirection(foundX, foundZ);
 
-            if (mc.player.posY < 40) {
-                yStatus = " (Active Zone)";
-                slimeColor = 0x55FF55; // Grün
+                // Wenn nah (< 24 Blöcke), nehmen wir die Slime-Farbe, sonst ein dezentes Grau
+                int color = (actualDist < 24) ? ModConfig.colors.colorSlimeChunk : 0xAAAAAA;
+                lines.add(new InfoLine("Next Slime: ", String.format(Locale.US, "%.1fm (%s)", actualDist, dir), color));
             } else {
-                // Berechne Distanz nach unten zur aktiven Zone (Y=39)
-                double toGo = mc.player.posY - 39.0;
-                yStatus = String.format(Locale.US, " (Too High - Dig %.1fm Down)", toGo);
-                slimeColor = 0xFFFF55; // Gelb als Warnung
+                lines.add(new InfoLine("Slime Chunk: ", "None nearby", 0xFF5555));
             }
-            lines.add(new InfoLine("Slime Chunk: ", "YES" + yStatus, slimeColor));
         }
 
-        // 2. Navigation zum nächsten Chunk
-        if (minDistance != Double.MAX_VALUE) {
-            // Richtung berechnen
-            double diffX = targetX - mc.player.posX;
-            double diffZ = targetZ - mc.player.posZ;
-            String direction = getDirection(diffX, diffZ);
-
-            // NEU: Vertikale Komponente für die Navigation hinzufügen
-            String vNav = "";
-            if (mc.player.posY >= 40.0) {
-                double vDist = mc.player.posY - 39.0;
-                vNav = String.format(Locale.US, " | ↓ %.1fm Down", vDist);
-            }
-
-            int distColor = (minDistance < 16) ? 0x55FF55 : 0xAAAAAA;
-            lines.add(new InfoLine("Next Slime: ", String.format(Locale.US, "%.1fm (%s)%s", minDistance, direction, vNav), distColor));
-
-        } else {
-            lines.add(new InfoLine("Slime Chunk: ", "None in 6 Chunks", 0xFF5555));
-        }
-
+        this.cachedLines = lines;
+        this.lastUpdateTick = mc.player.ticksExisted;
         return lines;
     }
 
-    private String getDirection(double x, double z) {
-        double angle = Math.toDegrees(Math.atan2(x, z));
-        // Minecraft Winkel-Logik auf Himmelsrichtungen mappen
-        if (angle > -22.5 && angle <= 22.5) return "South";
-        if (angle > 22.5 && angle <= 67.5) return "South-West";
-        if (angle > 67.5 && angle <= 112.5) return "West";
-        if (angle > 112.5 && angle <= 157.5) return "North-West";
-        if (angle > 157.5 || angle <= -157.5) return "North";
-        if (angle > -157.5 && angle <= -112.5) return "North-East";
-        if (angle > -112.5 && angle <= -67.5) return "East";
-        return "South-East";
+    private String getRelativeDirection(double targetX, double targetZ) {
+        double diffX = targetX - mc.player.posX;
+        double diffZ = targetZ - mc.player.posZ;
+        float angle = (float) (MathHelper.atan2(diffX, diffZ) * (180D / Math.PI));
+        // Wichtig: In 1.12.2 ist rotationYaw manchmal invertiert, wrapDegrees korrigiert das
+        float relativeAngle = MathHelper.wrapDegrees(angle - mc.player.rotationYaw);
+
+        if (relativeAngle > -22.5 && relativeAngle <= 22.5) return "Ahead";
+        if (relativeAngle > 22.5 && relativeAngle <= 67.5) return "Left-Ahead";
+        if (relativeAngle > 67.5 && relativeAngle <= 112.5) return "Left";
+        if (relativeAngle > 112.5 && relativeAngle <= 157.5) return "Left-Behind";
+        if (relativeAngle > 157.5 || relativeAngle <= -157.5) return "Behind";
+        if (relativeAngle > -157.5 && relativeAngle <= -112.5) return "Right-Behind";
+        if (relativeAngle > -112.5 && relativeAngle <= -67.5) return "Right";
+        return "Right-Ahead";
     }
 
     private boolean isSlimeChunk(long seed, int x, int z) {
-        Random rnd = new Random(seed +
-                (long) (x * x * 0x4c1906) +
-                (long) (x * 0x5ac0db) +
-                (long) (z * z) * 0x4307a7L +
-                (long) (z * 0x5f24f) ^ 0x3ad8025fL);
-        return rnd.nextInt(10) == 0;
+        // Mathematisch korrekte Slime-Chunk-Formel für 1.12.2
+        slimeRand.setSeed(seed + (long) (x * x * 0x4c1906) + (long) (x * 0x5ac0db) + (long) (z * z) * 0x4307a7L + (long) (z * 0x5f24f) ^ 0x3ad8025fL);
+        return slimeRand.nextInt(10) == 0;
     }
 }

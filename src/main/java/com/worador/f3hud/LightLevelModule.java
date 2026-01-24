@@ -6,28 +6,40 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LightLevelModule extends InfoModule {
+    private long lastUpdateTick = -1;
+    private List<InfoLine> cachedLines = new ArrayList<>();
+
     @Override public String getName() { return "Light Level"; }
     @Override protected boolean isEnabledInConfig() { return ModConfig.modules.showLightLevel; }
 
     @Override
     public List<InfoLine> getLines() {
-        List<InfoLine> lines = new ArrayList<>();
-        if (mc.player == null || mc.world == null) return lines;
+        if (!isEnabledInConfig() || mc.player == null || mc.world == null) return new ArrayList<>();
 
-        BlockPos pos = new BlockPos(mc.player);
+        // Tick-Caching: Licht muss nicht jeden Frame berechnet werden (alle 5 Ticks reicht völlig)
+        if (mc.player.ticksExisted - lastUpdateTick < 5 && !cachedLines.isEmpty()) {
+            return cachedLines;
+        }
+
+        List<InfoLine> lines = new ArrayList<>();
+        BlockPos pos = new BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ);
+
         int sky = mc.world.getLightFor(EnumSkyBlock.SKY, pos);
         int block = mc.world.getLightFor(EnumSkyBlock.BLOCK, pos);
-        int total = Math.max(sky, block);
 
-        // Anzeige des Rohwerts
-        int lightColor = (total < 8) ? 0xFF5555 : ModConfig.colors.colorLight;
-        lines.add(new InfoLine("Light: ", total + " (Sky: " + sky + ", Block: " + block + ")", lightColor));
-
-        // Real Light (Sicherheits-Check)
+        // "Real Light" (Berücksichtigt Tageszeit/Nacht/Regen für Mob-Spawns)
         int realSky = Math.max(0, sky - mc.world.calculateSkylightSubtracted(1.0F));
-        int realTotal = Math.max(realSky, block);
-        lines.add(new InfoLine("Safety: ", realTotal + (realTotal <= 7 ? " [DANGER]" : " [SAFE]"), (realTotal <= 7 ? 0xFF5555 : 0x55FF55)));
+        int total = Math.max(realSky, block);
 
+        // Kompakte Anzeige: Nur eine Zeile, die alles sagt
+        // Farbe wird ROT wenn Monster spawnen können (total <= 7)
+        String status = (total <= 7) ? "§c[DANGER]" : "§a[SAFE]";
+        String valueInfo = String.format("%d (S:%d B:%d)", total, sky, block);
+
+        lines.add(new InfoLine("Light: ", valueInfo + " " + status, ModConfig.colors.colorLight));
+
+        this.cachedLines = lines;
+        this.lastUpdateTick = mc.player.ticksExisted;
         return lines;
     }
 }

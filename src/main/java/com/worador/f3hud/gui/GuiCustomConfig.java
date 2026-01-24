@@ -21,7 +21,8 @@ import java.util.Map;
 
 public class GuiCustomConfig extends GuiScreen {
 
-    private enum Tab { MODULES, LAYOUT, COLORS }
+    // Tab erweitert um PRESETS
+    private enum Tab { MODULES, LAYOUT, COLORS, PRESETS }
     private Tab currentTab = Tab.MODULES;
 
     private static final int BUTTON_WIDTH = 180;
@@ -30,8 +31,9 @@ public class GuiCustomConfig extends GuiScreen {
     private int scrollOffset = 0;
     private int maxScroll = 0;
 
-    private final Map<Integer, Integer> colorCache = new HashMap<>();
-    private long lastCacheUpdate = 0;
+    // Feedback Variablen für Presets
+    private long presetFeedbackTime = 0;
+    private int lastPresetId = -1;
 
     private final Map<Class<? extends InfoModule>, String> moduleFieldMapping = new HashMap<>();
     private List<InfoModule> leftModules;
@@ -40,7 +42,6 @@ public class GuiCustomConfig extends GuiScreen {
     @Override
     public void initGui() {
         this.buttonList.clear();
-        this.colorCache.clear();
         this.scrollOffset = 0;
         leftModules = ModuleRegistry.getLeftModules();
         rightModules = ModuleRegistry.getRightModules();
@@ -48,10 +49,14 @@ public class GuiCustomConfig extends GuiScreen {
 
         int centerX = this.width / 2;
 
-        this.buttonList.add(new GuiButtonExt(10, centerX - 155, 30, 100, 20, (currentTab == Tab.MODULES ? "§6§l" : "") + "Modules"));
-        this.buttonList.add(new GuiButtonExt(11, centerX - 50, 30, 100, 20, (currentTab == Tab.LAYOUT ? "§6§l" : "") + "Layout"));
-        this.buttonList.add(new GuiButtonExt(12, centerX + 55, 30, 100, 20, (currentTab == Tab.COLORS ? "§6§l" : "") + "Colors"));
+        // Statische Tab-Buttons (Jetzt 4 Buttons, leicht schmaler für Platz)
+        int tabW = 75;
+        this.buttonList.add(new GuiButtonExt(10, centerX - 160, 25, tabW, 20, (currentTab == Tab.MODULES ? "§6§l" : "") + "Modules"));
+        this.buttonList.add(new GuiButtonExt(11, centerX - 80, 25, tabW, 20, (currentTab == Tab.LAYOUT ? "§6§l" : "") + "Layout"));
+        this.buttonList.add(new GuiButtonExt(12, centerX + 0, 25, tabW, 20, (currentTab == Tab.COLORS ? "§6§l" : "") + "Colors"));
+        this.buttonList.add(new GuiButtonExt(13, centerX + 80, 25, tabW, 20, (currentTab == Tab.PRESETS ? "§6§l" : "") + "Presets"));
 
+        // Save & Reset
         this.buttonList.add(new GuiButtonExt(0, centerX - (currentTab == Tab.COLORS ? 160 : 75), this.height - 30, 150, 20, "§aSave & Exit"));
         if (currentTab == Tab.COLORS) {
             this.buttonList.add(new GuiButtonExt(999, centerX + 10, this.height - 30, 150, 20, "§cReset Colors"));
@@ -61,35 +66,32 @@ public class GuiCustomConfig extends GuiScreen {
             case MODULES: initModulesTab(); break;
             case LAYOUT:  initLayoutTab(); break;
             case COLORS:  initColorsTab(); break;
+            case PRESETS: initPresetsTab(); break;
         }
     }
 
     private void initModulesTab() {
-        int areaHeight = this.height - 140;
-        int totalContentHeight = Math.max(leftModules.size(), rightModules.size()) * 25;
-        maxScroll = Math.max(0, totalContentHeight - areaHeight);
         int centerX = this.width / 2;
-        this.buttonList.add(new GuiButtonExt(800, centerX - 75, 58, 150, 20, getPerformanceButtonText()));
+        int yStart = 60;
+        this.buttonList.add(new GuiButtonExt(801, centerX - 75, yStart, 150, 20, "FPS Display: " + (ModConfig.modules.showFPS ? "§aON" : "§cOFF")));
+        this.buttonList.add(new GuiButtonExt(800, centerX - 75, yStart + 25, 150, 20, getPerformanceButtonText()));
+
         for (int i = 0; i < leftModules.size(); i++)
-            this.buttonList.add(new GuiButtonExt(200 + i, centerX - 190, 85 + i * 25, BUTTON_WIDTH, 20, ""));
+            this.buttonList.add(new GuiButtonExt(200 + i, centerX - 190, yStart + 55 + i * 25, BUTTON_WIDTH, 20, ""));
         for (int i = 0; i < rightModules.size(); i++)
-            this.buttonList.add(new GuiButtonExt(300 + i, centerX + 10, 85 + i * 25, BUTTON_WIDTH, 20, ""));
+            this.buttonList.add(new GuiButtonExt(300 + i, centerX + 10, yStart + 55 + i * 25, BUTTON_WIDTH, 20, ""));
+
+        maxScroll = Math.max(0, (55 + Math.max(leftModules.size(), rightModules.size()) * 25) - (this.height - 110));
     }
 
     private void initLayoutTab() {
         int centerX = this.width / 2;
-        int y = 70;
-        this.buttonList.add(new GuiSlider(102, centerX - 155, y, 150, 20, "HUD Scale: ", "", 0.1, 2.0, ModConfig.position.userScale, false, true, s -> {
-            ModConfig.position.userScale = Math.round(s.getValue() * 10.0) / 10.0;
-            s.displayString = "HUD Scale: " + ModConfig.position.userScale;
-        }));
+        int y = 65;
+        this.buttonList.add(new GuiSlider(102, centerX - 155, y, 150, 20, "HUD Scale: ", "", 0.1, 2.0, ModConfig.position.userScale, false, true, s -> ModConfig.position.userScale = Math.round(s.getValue() * 10.0) / 10.0));
         this.buttonList.add(new GuiSlider(103, centerX + 5, y, 150, 20, "BG Alpha: ", "", 0, 255, ModConfig.animation.textBackgroundAlpha, false, true, s -> ModConfig.animation.textBackgroundAlpha = s.getValueInt()));
         y += 25;
         this.buttonList.add(new GuiSlider(100, centerX - 155, y, 150, 20, "Left X: ", "", 0, 200, ModConfig.position.leftX, false, true, s -> ModConfig.position.leftX = s.getValueInt()));
         this.buttonList.add(new GuiSlider(101, centerX + 5, y, 150, 20, "Right X: ", "", 0, 200, ModConfig.position.rightX, false, true, s -> ModConfig.position.rightX = s.getValueInt()));
-        y += 25;
-        this.buttonList.add(new GuiSlider(104, centerX - 155, y, 150, 20, "Compass Y: ", "", 0, 200, ModConfig.position.compassYOffset, false, true, s -> ModConfig.position.compassYOffset = s.getValueInt()));
-        this.buttonList.add(new GuiSlider(107, centerX + 5, y, 150, 20, "Anim Dist: ", "", 0, 200, ModConfig.animation.slideDistance, false, true, s -> ModConfig.animation.slideDistance = s.getValueInt()));
         y += 30;
         this.buttonList.add(new GuiButtonExt(105, centerX - 155, y, 150, 20, getAnimationButtonText()));
         this.buttonList.add(new GuiButtonExt(106, centerX + 5, y, 150, 20, getBackgroundButtonText()));
@@ -98,17 +100,37 @@ public class GuiCustomConfig extends GuiScreen {
 
     private void initColorsTab() {
         int centerX = this.width / 2;
-        // Korrigiert auf die exakten Feldnamen in deiner ModConfig.Colors Klasse
-        String[] fields = {"colorFPS", "colorX", "colorY", "colorZ", "colorSlimeChunk", "colorChunk", "colorBlock", "colorLight", "colorBiome", "colorDimension", "colorRotation", "colorMonsters", "colorCreatures", "colorSystem", "colorDefault", "colorCompass", "colorRegion", "colorTargetedBlock", "colorEntityStats", "colorEntities", "colorPerformance", "colorVersion", "colorServer", "colorEnd", "colorOxygen", "colorDurability", "colorPotion", "colorBeacon", "colorWeather", "colorGrowth", "colorSpeedometer", "colorVillagerTrade", "colorItemDespawn", "colorHealthAndHunger", "colorMobAggro", "colorMachineProgress", "colorExplosion", "colorAstral", "colorStellar", "colorBotania", "colorBloodMagic", "colorThaumcraft"};
-        String[] labels = {"FPS", "X", "Y", "Z", "Slime", "Chunks", "Block", "Light", "Biome", "Dim", "Rot", "Monsters", "Creatures", "System", "Default", "Compass", "Region", "Target", "E-Stats", "Entities", "Perf", "Ver", "Server", "End", "O2", "Dura", "Potion", "Beacon", "Weather", "Growth", "Speed", "Trade", "Despawn", "Health", "Aggro", "Machine", "Explo", "Astral", "Stellar", "Botania", "Blood", "Thaum"};
+        String[] fields = {"colorFPS", "colorX", "colorY", "colorZ", "colorSlimeChunk", "colorChunk", "colorBlock", "colorLight", "colorBiome", "colorDimension", "colorRotation", "colorMonsters", "colorCreatures", "colorSystem", "colorDefault", "colorCompass", "colorRegion", "colorTargetedBlock", "colorEntityStats", "colorEntities", "colorPerformance", "colorVersion", "colorServer", "colorEnd", "colorOxygen", "colorDurability", "colorPotion", "colorBeacon", "colorWeather", "colorGrowth", "colorSpeedometer", "colorVillagerTrade", "colorItemDespawn", "colorHealthAndHunger", "colorMobAggro", "colorMachineProgress", "colorExplosion", "colorBotania", "colorBloodMagic", "colorThaumcraft", "colorAstral", "colorStellar"};
+        String[] labels = {"FPS", "X", "Y", "Z", "Slime", "Chunks", "Block", "Light", "Biome", "Dim", "Rot", "Monsters", "Creatures", "System", "Default", "Compass", "Region", "Target", "E-Stats", "Entities", "Perf", "Ver", "Server", "End", "O2", "Dura", "Potion", "Beacon", "Weather", "Growth", "Speed", "Trade", "Despawn", "Health", "Aggro", "Machine", "Explo", "Botania", "Blood", "Thaum", "Astral", "Stellar"};
 
-        int areaHeight = this.height - 110;
-        maxScroll = Math.max(0, (fields.length / 2) * 45 - areaHeight + 65);
         for(int i = 0; i < fields.length; i++) {
             int xPos = (i % 2 == 0) ? centerX - 155 : centerX + 5;
-            int yPos = 85 + (i / 2) * 45;
+            int yPos = 70 + (i / 2) * 45;
             addColorSlider(500 + i, xPos, yPos, labels[i], fields[i]);
         }
+        maxScroll = Math.max(0, (fields.length / 2 * 45) - (this.height - 120));
+    }
+
+    private void initPresetsTab() {
+        int centerX = this.width / 2;
+        int y = 70;
+        long now = System.currentTimeMillis();
+
+        // Button 900: General
+        String label900 = (lastPresetId == 900 && now - presetFeedbackTime < 2000) ? "§a§lApplied!" : "§bLoad: General";
+        this.buttonList.add(new GuiButtonExt(900, centerX - 100, y, 200, 20, label900));
+        y += 45;
+
+        // Button 901: PvP
+        String label901 = (lastPresetId == 901 && now - presetFeedbackTime < 2000) ? "§a§lApplied!" : "§eLoad: PvP / Survival";
+        this.buttonList.add(new GuiButtonExt(901, centerX - 100, y, 200, 20, label901));
+        y += 45;
+
+        // Button 902: Technical
+        String label902 = (lastPresetId == 902 && now - presetFeedbackTime < 2000) ? "§a§lApplied!" : "§cLoad: Technical";
+        this.buttonList.add(new GuiButtonExt(902, centerX - 100, y, 200, 20, label902));
+
+        maxScroll = 0;
     }
 
     private void addColorSlider(int id, int x, int y, String label, String configField) {
@@ -121,7 +143,6 @@ public class GuiCustomConfig extends GuiScreen {
                 try {
                     field.setInt(ModConfig.colors, Color.HSBtoRGB((float)s.getValue(), 0.8f, 1.0f) & 0xFFFFFF);
                 } catch (Exception e) { e.printStackTrace(); }
-                colorCache.remove(id);
             }));
         } catch (Exception e) { e.printStackTrace(); }
     }
@@ -130,42 +151,63 @@ public class GuiCustomConfig extends GuiScreen {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawGradientRect(0, 0, this.width, this.height, 0xD0101010, 0xE0101010);
         int centerX = this.width / 2;
-        drawRect(centerX - 160, 52, centerX + 160, 54, 0xFF555555);
+        drawRect(centerX - 160, 50, centerX + 160, 52, 0xFF555555);
+
         ScaledResolution res = new ScaledResolution(mc);
-        int areaTop = (currentTab == Tab.MODULES) ? 80 : 65;
+        int areaTop = 55;
         int areaBottom = this.height - 40;
 
-        for (int i = 0; i < buttonList.size(); i++) {
-            GuiButton b = buttonList.get(i);
-            if (b.id < 100 || b.id == 800 || b.id == 999) b.drawButton(mc, mouseX, mouseY, partialTicks);
+        for (GuiButton b : buttonList) {
+            if (b.id < 100 || b.id == 999) b.drawButton(mc, mouseX, mouseY, partialTicks);
         }
 
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GL11.glScissor(0, (this.height - areaBottom) * res.getScaleFactor(), this.width * res.getScaleFactor(), (areaBottom - areaTop) * res.getScaleFactor());
-        for (int i = 0; i < buttonList.size(); i++) {
-            GuiButton b = buttonList.get(i);
-            if (b.id >= 100 && b.id != 800 && b.id != 999) {
+
+        for (GuiButton b : buttonList) {
+            if (b.id >= 100 && b.id != 999) {
                 b.y -= scrollOffset;
                 if (b.id >= 200 && b.id < 400) b.displayString = getButtonTextById(b.id);
+
+                // Dynamisches Text-Update für Presets während des Renderings (für flüssiges Feedback)
+                if (b.id >= 900 && b.id <= 902 && b.id == lastPresetId) {
+                    if (System.currentTimeMillis() - presetFeedbackTime < 2000) {
+                        b.displayString = "§a§lApplied!";
+                    } else {
+                        if (b.id == 900) b.displayString = "§bLoad: General";
+                        if (b.id == 901) b.displayString = "§eLoad: PvP / Survival";
+                        if (b.id == 902) b.displayString = "§cLoad: Technical";
+                    }
+                }
+
                 b.drawButton(mc, mouseX, mouseY, partialTicks);
                 b.y += scrollOffset;
             }
         }
+
         if (currentTab == Tab.COLORS) renderColorPreviews(areaTop, areaBottom);
+
+        // Preset Beschreibungen zeichnen
+        if (currentTab == Tab.PRESETS) {
+            int y = 92;
+            drawCenteredString(fontRenderer, "§7Immersion: XYZ (3 Stellen), Biome, Crops, Light Level.", centerX, y, 0xFFFFFF);
+            drawCenteredString(fontRenderer, "§7Efficiency: Speed, Potions, Durability, Item Despawn.", centerX, y + 45, 0xFFFFFF);
+            drawCenteredString(fontRenderer, "§7Debug: Chunk-Rel, TPS, System Info, Performance Graph.", centerX, y + 90, 0xFFFFFF);
+        }
+
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
         drawCenteredString(fontRenderer, "§bBetter F3 Editor", width / 2, 10, 0xFFFFFF);
     }
 
     private void renderColorPreviews(int top, int bottom) {
-        for (int i = 0; i < buttonList.size(); i++) {
-            GuiButton b = buttonList.get(i);
+        for (GuiButton b : buttonList) {
             if (b.id >= 500 && b instanceof GuiSlider) {
                 int renderY = b.y - scrollOffset;
                 if (renderY > top - 35 && renderY < bottom) {
-                    int color = Color.HSBtoRGB((float)((GuiSlider)b).getValue(), 0.8f, 1.0f);                    String name = b.displayString.split(":")[0];
+                    int color = Color.HSBtoRGB((float)((GuiSlider)b).getValue(), 0.8f, 1.0f);
+                    String name = b.displayString.split(":")[0];
                     fontRenderer.drawStringWithShadow(name, b.x + 2, renderY - 11, color | 0xFF000000);
                     drawRect(b.x, renderY + 19, b.x + 150, renderY + 20, color | 0xAA000000);
-                    drawRect(b.x + 144, renderY + 4, b.x + 148, renderY + 16, color | 0xFF000000);
                 }
             }
         }
@@ -173,28 +215,28 @@ public class GuiCustomConfig extends GuiScreen {
 
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        for (int i = 0; i < this.buttonList.size(); i++) {
-            GuiButton b = this.buttonList.get(i);
-            if (b.id >= 100 && b.id != 800 && b.id != 999) {
+        for (GuiButton b : buttonList) {
+            if (b.id >= 100 && b.id != 999) {
                 b.y -= scrollOffset;
-                if (b.mousePressed(this.mc, mouseX, mouseY)) {
-                    b.playPressSound(this.mc.getSoundHandler());
-                    this.actionPerformed(b);
-                    if (i >= this.buttonList.size()) break;
+                if (b.mousePressed(mc, mouseX, mouseY)) {
+                    b.playPressSound(mc.getSoundHandler());
+                    actionPerformed(b);
+                    b.y += scrollOffset;
+                    return;
                 }
                 b.y += scrollOffset;
-            } else if (b.mousePressed(this.mc, mouseX, mouseY)) {
-                b.playPressSound(this.mc.getSoundHandler());
-                this.actionPerformed(b);
+            } else if (b.mousePressed(mc, mouseX, mouseY)) {
+                b.playPressSound(mc.getSoundHandler());
+                actionPerformed(b);
+                return;
             }
         }
     }
 
     @Override
     protected void mouseReleased(int mouseX, int mouseY, int state) {
-        for (int i = 0; i < this.buttonList.size(); i++) {
-            GuiButton b = this.buttonList.get(i);
-            if (b.id >= 100 && b.id != 800 && b.id != 999) {
+        for (GuiButton b : buttonList) {
+            if (b.id >= 100 && b.id != 999) {
                 b.y -= scrollOffset;
                 b.mouseReleased(mouseX, mouseY);
                 b.y += scrollOffset;
@@ -207,29 +249,35 @@ public class GuiCustomConfig extends GuiScreen {
     @Override
     protected void actionPerformed(GuiButton button) throws IOException {
         if (button.id == 0) { ConfigManager.sync("betterf3reborn", net.minecraftforge.common.config.Config.Type.INSTANCE); mc.displayGuiScreen(null); return; }
-        if (button.id == 999) { ModConfig.colors = new ModConfig.Colors(); colorCache.clear(); initGui(); return; }
-        if (button.id >= 10 && button.id <= 12) { currentTab = Tab.values()[button.id - 10]; initGui(); return; }
+        if (button.id == 999) { ModConfig.colors = new ModConfig.Colors(); initGui(); return; }
+        if (button.id >= 10 && button.id <= 13) { currentTab = Tab.values()[button.id - 10]; initGui(); return; }
         if (button.id == 800) { togglePerformanceMode(); initGui(); return; }
+        if (button.id == 801) { ModConfig.modules.showFPS = !ModConfig.modules.showFPS; return; }
         if (button.id == 105) { ModConfig.animation.enableAnimation = !ModConfig.animation.enableAnimation; return; }
         if (button.id == 106) { ModConfig.animation.showTextBackground = !ModConfig.animation.showTextBackground; return; }
+
+        // Preset Handling mit Feedback
+        if (button.id >= 900 && button.id <= 902) {
+            ModConfig.applyPreset(button.id - 900);
+            presetFeedbackTime = System.currentTimeMillis();
+            lastPresetId = button.id;
+            // initGui() wird hier nicht zwingend benötigt, da drawScreen den Text live updated,
+            // aber wir rufen es auf, um die Checkboxen in den anderen Tabs zu aktualisieren.
+            initGui();
+            return;
+        }
+
         if (button.id >= 200 && button.id < 400) toggleModule((button.id < 300) ? leftModules.get(button.id - 200) : rightModules.get(button.id - 300));
     }
 
-    @Override
-    public void handleMouseInput() throws IOException {
-        super.handleMouseInput();
-        int delta = Mouse.getDWheel();
-        if (delta != 0) scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset - (delta > 0 ? SCROLL_SPEED : -SCROLL_SPEED)));
-    }
-
     private void setupFieldMapping() {
-        // Linker Bereich
         moduleFieldMapping.put(com.worador.f3hud.CoordinatesModule.class, "showCoordinates");
-        moduleFieldMapping.put(com.worador.f3hud.SlimeChunkModule.class, "showSlimeDistance");
+        moduleFieldMapping.put(com.worador.f3hud.SlimeChunkModule.class, "showSlimeChunk");
         moduleFieldMapping.put(com.worador.f3hud.ChunkPosModule.class, "showChunkPos");
         moduleFieldMapping.put(com.worador.f3hud.LightLevelModule.class, "showLightLevel");
         moduleFieldMapping.put(com.worador.f3hud.RotationModule.class, "showRotation");
         moduleFieldMapping.put(com.worador.f3hud.WorldModule.class, "showWorld");
+        moduleFieldMapping.put(com.worador.f3hud.BiomeModule.class, "showBiome");
         moduleFieldMapping.put(com.worador.f3hud.DimensionModule.class, "showDimension");
         moduleFieldMapping.put(com.worador.f3hud.TravelModule.class, "showTravelModule");
         moduleFieldMapping.put(com.worador.f3hud.RegionModule.class, "showRegion");
@@ -238,28 +286,27 @@ public class GuiCustomConfig extends GuiScreen {
         moduleFieldMapping.put(com.worador.f3hud.EntityStatsModule.class, "showEntityStats");
         moduleFieldMapping.put(com.worador.f3hud.CompassModule.class, "showCompass");
         moduleFieldMapping.put(com.worador.f3hud.PerformanceModule.class, "showPerformanceGraph");
-        moduleFieldMapping.put(com.worador.f3hud.EndModule.class, "showEndModule");
-
-        // Rechter Bereich
+        moduleFieldMapping.put(com.worador.f3hud.EndModule.class, "showEnd");
         moduleFieldMapping.put(com.worador.f3hud.SystemModule.class, "showSystem");
         moduleFieldMapping.put(com.worador.f3hud.VersionModule.class, "showVersion");
+        moduleFieldMapping.put(com.worador.f3hud.ServerModule.class, "showServer");
+        moduleFieldMapping.put(com.worador.f3hud.HealthAndHungerModule.class, "showHealthStats");
+        moduleFieldMapping.put(com.worador.f3hud.OxygenModule.class, "showOxygen");
+        moduleFieldMapping.put(com.worador.f3hud.PotionModule.class, "showPotion");
+        moduleFieldMapping.put(com.worador.f3hud.DurabilityModule.class, "showDurability");
+        moduleFieldMapping.put(com.worador.f3hud.SpeedometerModule.class, "showSpeedometer");
+        moduleFieldMapping.put(com.worador.f3hud.WeatherModule.class, "showWeather");
+        moduleFieldMapping.put(com.worador.f3hud.GrowthModule.class, "showGrowth");
+        moduleFieldMapping.put(com.worador.f3hud.VillagerTradeModule.class, "showVillagerTrade");
+        moduleFieldMapping.put(com.worador.f3hud.ItemDespawnModule.class, "showItemDespawn");
+        moduleFieldMapping.put(com.worador.f3hud.MachineProgressModule.class, "showMachineProgress");
+        moduleFieldMapping.put(com.worador.f3hud.MobAggroModule.class, "showAggroModule");
+        moduleFieldMapping.put(com.worador.f3hud.BeaconModule.class, "showBeacon");
         moduleFieldMapping.put(com.worador.f3hud.AstralModule.class, "showAstralSorcery");
         moduleFieldMapping.put(com.worador.f3hud.StellarModule.class, "showStellar");
         moduleFieldMapping.put(com.worador.f3hud.BotaniaModule.class, "showBotania");
         moduleFieldMapping.put(com.worador.f3hud.BloodMagicModule.class, "showBloodMagic");
         moduleFieldMapping.put(com.worador.f3hud.ThaumcraftModule.class, "showThaumcraft");
-        moduleFieldMapping.put(com.worador.f3hud.HealthAndHungerModule.class, "showHealthStats");
-        moduleFieldMapping.put(com.worador.f3hud.OxygenModule.class, "showOxygen");
-        moduleFieldMapping.put(com.worador.f3hud.PotionModule.class, "showPotions");
-        moduleFieldMapping.put(com.worador.f3hud.DurabilityModule.class, "showDurability");
-        moduleFieldMapping.put(com.worador.f3hud.SpeedometerModule.class, "showSpeedometer");
-        moduleFieldMapping.put(com.worador.f3hud.WeatherModule.class, "showWeather");
-        moduleFieldMapping.put(com.worador.f3hud.GrowthModule.class, "showGrowth");
-        moduleFieldMapping.put(com.worador.f3hud.VillagerTradeModule.class, "showVillagerStatus");
-        moduleFieldMapping.put(com.worador.f3hud.ItemDespawnModule.class, "showItemDespawn");
-        moduleFieldMapping.put(com.worador.f3hud.MachineProgressModule.class, "showMachineProgress");
-        moduleFieldMapping.put(com.worador.f3hud.MobAggroModule.class, "showAggroModule");
-        moduleFieldMapping.put(com.worador.f3hud.BeaconModule.class, "showBeaconRange");
     }
 
     private String getButtonTextById(int id) {
@@ -287,7 +334,6 @@ public class GuiCustomConfig extends GuiScreen {
     private void togglePerformanceMode() {
         ModConfig.modules.showTravelModule = false;
         ModConfig.modules.showLightLevel = false;
-        ModConfig.modules.showDetailedChunks = false;
         ConfigManager.sync("betterf3reborn", net.minecraftforge.common.config.Config.Type.INSTANCE);
     }
 
@@ -298,6 +344,12 @@ public class GuiCustomConfig extends GuiScreen {
             Field field = ModConfig.Modules.class.getField(fieldName);
             field.setBoolean(ModConfig.modules, !field.getBoolean(ModConfig.modules));
         } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    @Override public void handleMouseInput() throws IOException {
+        super.handleMouseInput();
+        int delta = Mouse.getDWheel();
+        if (delta != 0) scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset - (delta > 0 ? SCROLL_SPEED : -SCROLL_SPEED)));
     }
 
     @Override public boolean doesGuiPauseGame() { return false; }

@@ -16,12 +16,12 @@ public class ExplosionModule extends InfoModule {
 
     @Override
     public String getName() {
-        return "Explosion Warning";
+        return "Explosion Timer";
     }
 
     @Override
     protected boolean isEnabledInConfig() {
-        return ModConfig.modules.showExplosionTimer;
+        return ModConfig.modules.showExplosion;
     }
 
     @Override
